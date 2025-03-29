@@ -105,11 +105,18 @@ export default function RegisterSubscriber() {
             name="type"
             value={activeTab === 'regular' ? regularData.type : srsData.type}
             onChange={activeTab === 'regular' ? handleRegularChange : handleSrsChange}
-            className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="w-full bg-white/20 border border-white/30 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/30"
           >
-            <option className="text-black" value="daily">Daily</option>
-            <option className="text-black" value="weekly">Weekly</option>
-            <option className="text-black" value="monthly">Monthly</option>
+            <option label='select type'></option>
+            <option value="half-day-morning" className="text-black">Half-day (morning)</option>
+            <option value="half-day-night" className="text-black">Half-day (night)</option>
+            <option value="full-day" className="text-black">Full day</option>
+            <option value="weekly-day-only" className="text-black">Weekly (day-only)</option>
+            <option value="weekly-full-access" className="text-black">Weekly (full-access)</option>
+            <option value="bi-weekly-day-only" className="text-black">Bi-weekly (day-only)</option>
+            <option value="bi-weekly-full-access" className="text-black">Bi-weekly (full-access)</option>
+            <option value="monthly-day-only" className="text-black">Monthly (day-only)</option>
+            <option value="monthly-full-access" className="text-black">Monthly (full-access)</option>
           </select>
         </div>
 
