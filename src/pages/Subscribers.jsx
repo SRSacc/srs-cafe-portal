@@ -131,7 +131,7 @@ export default function Subscribers() {
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         {/* Search Box with Filter Icon */}
-        <div className="relative w-full md:w-1/2">
+        <div className="relative w-full md:w-1/1">
           <input
             type="text"
             placeholder="Search..."

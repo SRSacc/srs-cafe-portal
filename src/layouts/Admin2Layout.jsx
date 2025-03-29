@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Home, UserPlus, Users, Bell, Menu } from 'lucide-react';
 import Logo from '../assets/SRSLogoWhite.svg';
+import { useNotifications } from '../context/NotificationContext';
 
 const navItems = [
   { name: 'Register', path: '/dashboard/admin2/register', icon: <UserPlus size={18} /> },
@@ -9,9 +10,14 @@ const navItems = [
   { name: 'Notifications', path: '/dashboard/admin2/notifications', icon: <Bell size={18} /> },
 ];
 
+
+
+
 export default function Admin2Layout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { newCount } = useNotifications();
+
 
   return (
     <div className="flex h-screen text-white font-sans relative">
@@ -33,9 +39,8 @@ export default function Admin2Layout() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:static top-0 left-0 z-40 h-full w-64 bg-black p-6 flex flex-col justify-between border-r border-white/10 transform transition-transform duration-300 ease-in-out ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      }`}>
+      <aside className={`fixed lg:static top-0 left-0 z-40 h-full w-64 bg-black p-6 flex flex-col justify-between border-r border-white/10 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
         <div>
           <div className="flex items-center gap-3 mb-10">
             <img src={Logo} alt="SRS Café Logo" className="w-8 h-8" />
@@ -48,14 +53,21 @@ export default function Admin2Layout() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${
-                    isActive ? 'bg-white text-black font-medium' : 'hover:bg-gray-800 text-white'
-                  }`}
+                  className={`relative flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive ? 'bg-white text-black font-medium' : 'hover:bg-gray-800 text-white'
+                    }`}
                   onClick={() => setSidebarOpen(false)}
                 >
                   {item.icon}
                   {item.name}
+
+                  {/* 🔴 Show badge for Notifications only if new notifications exist */}
+                  {item.name === 'Notifications' && newCount > 0 && (
+                    <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                      {newCount}
+                    </span>
+                  )}
                 </Link>
+
               );
             })}
           </nav>
