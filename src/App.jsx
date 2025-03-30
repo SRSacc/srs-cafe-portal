@@ -12,6 +12,10 @@ function App() {
       <Routes>
         <Route path="/" element={<AuthPage />} />
         <Route path="/admin2" element={<Admin2Layout />}>
+        {/**
+         * NOTE: switched admin dashboard from AdminDashboard.jsx to
+         * Subscribers.jsx.
+         */}
           {/* <Route path="admin2" element={<AdminDashboard/>} /> */}
           <Route path="dashboard" element={<Subscribers />} />
           <Route path="register" element={<RegisterSubscriber />} />
