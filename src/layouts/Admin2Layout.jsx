@@ -5,9 +5,11 @@ import Logo from '../assets/SRSLogoWhite.svg';
 import { useNotifications } from '../context/NotificationContext';
 
 const navItems = [
-  { name: 'Register', path: '/dashboard/admin2/register', icon: <UserPlus size={18} /> },
-  { name: 'Subscribers', path: '/dashboard/admin2/subscribers', icon: <Users size={18} /> },
-  { name: 'Notifications', path: '/dashboard/admin2/notifications', icon: <Bell size={18} /> },
+
+  { name: 'Dashboard', path: '/admin2/dashboard', icon: <Users size={18} /> },
+  // { name: 'Subscribers', path: '/dashboard/subscribers', icon: <Users size={18} /> },
+  { name: 'Register', path: '/admin2/register', icon: <UserPlus size={18} /> },
+  { name: 'Notifications', path: '/admin2/notifications', icon: <Bell size={18} /> },
 ];
 
 
@@ -43,7 +45,7 @@ export default function Admin2Layout() {
         }`}>
         <div>
           <div className="flex items-center gap-3 mb-10">
-            <img src={Logo} alt="SRS Café Logo" className="w-8 h-8" />
+            <img src={Logo} alt="SRS Café Logo" className="w-12 h-12" />
             <h1 className="text-xl font-semibold tracking-wide">SRS Café</h1>
           </div>
           <nav className="space-y-2">

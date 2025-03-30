@@ -11,9 +11,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<AuthPage />} />
-        <Route path="/dashboard/admin2" element={<Admin2Layout />}>
+        <Route path="/admin2" element={<Admin2Layout />}>
+          {/* <Route path="admin2" element={<AdminDashboard/>} /> */}
+          <Route path="dashboard" element={<Subscribers />} />
           <Route path="register" element={<RegisterSubscriber />} />
-          <Route path="subscribers" element={<Subscribers />} />
           <Route path="notifications" element={<Notifications />} />
         </Route>
       </Routes>

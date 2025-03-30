@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, /*useEffect*/ } from 'react';
 import dayjs from 'dayjs';
 import { User, Building2 } from 'lucide-react';
 
@@ -35,14 +35,14 @@ export default function RegisterSubscriber() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg p-10 rounded-3xl shadow-2xl text-white">
-      <h2 className="text-3xl font-bold mb-8 text-center">Register New Subscriber</h2>
+    <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg m:p-10 px-5 py-10  rounded-3xl shadow-2xl text-white">
+      <h2 className=" text-2xl m:text-3xl font-bold mb-8 text-center text-balance">Register New Subscriber</h2>
 
       {/* Tab Switch */}
       <div className="flex justify-center mb-10">
-        <div className="flex bg-white/10 rounded-full p-1 gap-2">
+        <div className="flex bg-white/10 w-full rounded-full p-1 gap-2">
           <button
-            className={`px-6 py-2 rounded-full flex items-center gap-2 text-sm transition ${
+            className={`px-1 sm:px-6  py-1 sm:py-2 rounded-full flex items-center text-center gap-1 sm:gap-2 text-sm text-balance overflow-hidden transition w-1/2 ${
               activeTab === 'regular' ? 'bg-white text-black font-semibold' : 'text-white hover:bg-white/20'
             }`}
             onClick={() => setActiveTab('regular')}
@@ -50,7 +50,7 @@ export default function RegisterSubscriber() {
             <User size={16} /> Regular Subscriber
           </button>
           <button
-            className={`px-6 py-2 rounded-full flex items-center gap-2 text-sm transition ${
+            className={`px-1 sm:px-6  py-1 sm:py-2 rounded-full flex items-center text-center gap-1 sm:gap-2 text-sm text-balance overflow-hidden transition w-1/2 ${
               activeTab === 'srs' ? 'bg-white text-black font-semibold' : 'text-white hover:bg-white/20'
             }`}
             onClick={() => setActiveTab('srs')}
