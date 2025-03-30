@@ -6,16 +6,16 @@ import { useNotifications } from '../context/NotificationContext';
 
 const navItems = [
 
-  { name: 'Dashboard', path: '/admin2/dashboard', icon: <Users size={18} /> },
+  { name: 'Dashboard', path: '/admin1/dashboard', icon: <Users size={18} /> },
   // { name: 'Subscribers', path: '/dashboard/subscribers', icon: <Users size={18} /> },
-  { name: 'Register', path: '/admin2/register', icon: <UserPlus size={18} /> },
-  { name: 'Notifications', path: '/admin2/notifications', icon: <Bell size={18} /> },
+  { name: 'Register', path: '/admin1/register', icon: <UserPlus size={18} /> },
+  { name: 'Notifications', path: '/admin1/notifications', icon: <Bell size={18} /> },
 ];
 
 
 
 
-export default function Admin2Layout() {
+export default function Admin1Layout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { newCount } = useNotifications();

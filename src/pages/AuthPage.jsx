@@ -5,20 +5,20 @@ import Ambassador from "../assets/Ambassador.png";
 
 
 export default function AuthPage() {
-  const [role, setRole] = useState("admin2");
+  const [role, setRole] = useState("admin1");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (role === "admin2" && username && password) {
+    if (role === "admin1" && username && password) {
       setIsLoggedIn(true);
     }
   };
 
   if (isLoggedIn) {
-    return <Navigate to="/admin2/dashboard" />;
+    return <Navigate to="/admin1/dashboard" />;
   }
 
   return (
@@ -71,8 +71,8 @@ export default function AuthPage() {
               ))}              
             </div>
 
-            {/* Login Form (Admin 2 only for now) */}
-            {role === "admin2" ? (
+            {/* Login Form (Admin 1 only for now) */}
+            {role === "admin1" ? (
               <form onSubmit={handleLogin}>
                 <div className="mb-4">
                   <label className="block mb-1 font-medium">Username</label>

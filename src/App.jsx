@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
 import AdminDashboard from './pages/AdminDashboard';
-import Admin2Layout from './layouts/Admin2Layout';
+import Admin1Layout from './layouts/Admin1Layout';
 import RegisterSubscriber from './pages/RegisterSubscriber';
 import Subscribers from './pages/Subscribers';
 import Notifications from './pages/Notifications';
@@ -11,7 +11,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<AuthPage />} />
-        <Route path="/admin2" element={<Admin2Layout />}>
+        <Route path="/admin1" element={<Admin1Layout />}>
         {/**
          * NOTE: switched admin dashboard from AdminDashboard.jsx to
          * Subscribers.jsx.
