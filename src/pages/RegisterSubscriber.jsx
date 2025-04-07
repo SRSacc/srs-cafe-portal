@@ -154,7 +154,7 @@ export default function RegisterSubscriber() {
             onChange={activeTab === 'regular' ? handleRegularChange : handleSrsChange}
             className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 placeholder-white focus:outline-none focus:ring-2 focus:ring-white/30"
             placeholder="Enter referral name or code"
-            required
+        
           />
         </div>
         <div>
