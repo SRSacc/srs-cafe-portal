@@ -1,13 +1,22 @@
-import { useState, /*useEffect*/ } from 'react';
+import { useState } from 'react';
 import dayjs from 'dayjs';
-import { User, Building2 } from 'lucide-react';
+import { User, Building2, Loader2 } from 'lucide-react';
+import { registerSubscriber } from '../api/subscriber';
+
+const Toast = ({ message, type = 'success' }) => (
+  <div className={`fixed bottom-4 right-4 z-50 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-lg shadow-lg border ${type === 'error' ? 'border-red-400' : 'border-white/30'} animate-fade-in-up`}>
+    {message}
+  </div>
+);
 
 export default function RegisterSubscriber() {
   const [activeTab, setActiveTab] = useState('regular');
-  const [regularData, setRegularData] = useState({ name: '', phone: '', referral: '', type: 'daily' });
-  const [srsData, setSrsData] = useState({ name: '', phone: '', referral: '', type: 'daily', paymentMode: 'self' });
+  const [regularData, setRegularData] = useState({ name: '', phoneNumber: '', referral: '', type: 'Half-day (morning)' });
+  const [srsData, setSrsData] = useState({ name: '', phoneNumber: '', referral: '', type: 'Half-day (morning)', paymentMode: 'self' });
   const [startDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ message: '', type: 'success' });
 
   const handleRegularChange = (e) => {
     setRegularData({ ...regularData, [e.target.name]: e.target.value });
@@ -24,35 +33,85 @@ export default function RegisterSubscriber() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = activeTab === 'regular'
-      ? { ...regularData, startDate, image }
-      : { ...srsData, startDate, image };
+    if (loading) return;
 
-    console.log('Registering Subscriber:', data);
-    // Add API call or alert here
+    // Validate form
+    const data = activeTab === 'regular' ? regularData : srsData;
+    if (!data.name.trim()) {
+      setToast({ message: 'Please enter a name', type: 'error' });
+      setTimeout(() => setToast({ message: '', type: 'success' }), 3000);
+      return;
+    }
+    if (!data.phoneNumber.trim()) {
+      setToast({ message: 'Please enter a phone number', type: 'error' });
+      setTimeout(() => setToast({ message: '', type: 'success' }), 3000);
+      return;
+    }
+    if (!data.type || data.type === 'Select type') {
+      setToast({ message: 'Please select a subscription type', type: 'error' });
+      setTimeout(() => setToast({ message: '', type: 'success' }), 3000);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('phoneNumber', data.phoneNumber);
+    formData.append('referral', data.referral);
+    formData.append('subscriberDetails.subscriptionType', data.type);
+    formData.append('subscriberDetails.subscriberType', activeTab === 'regular' ? 'Regular Subscriber' : 'SRS Worker');
+    formData.append('startDate', startDate);
+    formData.append('workerType', activeTab);
+
+    if (activeTab === 'srs') {
+      formData.append('paymentMode', data.paymentMode);
+    }
+
+    if (image) {
+      const file = document.querySelector('input[type="file"]').files[0];
+      formData.append('image', file);
+    }
+
+    setLoading(true);
+    try {
+      await registerSubscriber(formData);
+      setToast({ message: 'Subscriber registered successfully!', type: 'success' });
+      // Reset form
+      if (activeTab === 'regular') {
+        setRegularData({ name: '', phone: '', referral: '', type: 'daily' });
+      } else {
+        setSrsData({ name: '', phone: '', referral: '', type: 'daily', paymentMode: 'self' });
+      }
+      setImage(null);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setToast({ 
+        message: 'Network error. Please try again later.', 
+        type: 'error' 
+      });
+    } finally {
+      setLoading(false);
+      setTimeout(() => setToast({ message: '', type: 'success' }), 3000);
+    }
   };
 
+
   return (
-    <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg m:p-10 px-5 py-10  rounded-3xl shadow-2xl text-white">
-      <h2 className=" text-2xl m:text-3xl font-bold mb-8 text-center text-balance">Register New Subscriber</h2>
+    <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg m:p-10 px-5 py-10 rounded-3xl shadow-2xl text-white">
+      <h2 className="text-2xl m:text-3xl font-bold mb-8 text-center text-balance">Register New Subscriber</h2>
 
       {/* Tab Switch */}
       <div className="flex justify-center mb-10">
         <div className="flex bg-white/10 w-full rounded-full p-1 gap-2">
           <button
-            className={`px-1 sm:px-6  py-1 sm:py-2 rounded-full flex items-center text-center gap-1 sm:gap-2 text-sm text-balance overflow-hidden transition w-1/2 ${
-              activeTab === 'regular' ? 'bg-white text-black font-semibold' : 'text-white hover:bg-white/20'
-            }`}
+            className={`px-1 sm:px-6 py-1 sm:py-2 rounded-full flex items-center text-center gap-1 sm:gap-2 text-sm transition w-1/2 ${activeTab === 'regular' ? 'bg-white text-black font-semibold' : 'text-white hover:bg-white/20'}`}
             onClick={() => setActiveTab('regular')}
           >
             <User size={16} /> Regular Subscriber
           </button>
           <button
-            className={`px-1 sm:px-6  py-1 sm:py-2 rounded-full flex items-center text-center gap-1 sm:gap-2 text-sm text-balance overflow-hidden transition w-1/2 ${
-              activeTab === 'srs' ? 'bg-white text-black font-semibold' : 'text-white hover:bg-white/20'
-            }`}
+            className={`px-1 sm:px-6 py-1 sm:py-2 rounded-full flex items-center text-center gap-1 sm:gap-2 text-sm transition w-1/2 ${activeTab === 'srs' ? 'bg-white text-black font-semibold' : 'text-white hover:bg-white/20'}`}
             onClick={() => setActiveTab('srs')}
           >
             <Building2 size={16} /> SRS Worker
@@ -60,9 +119,8 @@ export default function RegisterSubscriber() {
         </div>
       </div>
 
-      {/* Dynamic Form */}
+      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-
         <div>
           <label className="block mb-1 text-sm font-medium">Full Name</label>
           <input
@@ -70,7 +128,7 @@ export default function RegisterSubscriber() {
             name="name"
             value={activeTab === 'regular' ? regularData.name : srsData.name}
             onChange={activeTab === 'regular' ? handleRegularChange : handleSrsChange}
-            className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-white border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 placeholder-white focus:outline-none focus:ring-2 focus:ring-white/30"
             placeholder="Enter full name"
             required
           />
@@ -79,10 +137,10 @@ export default function RegisterSubscriber() {
           <label className="block mb-1 text-sm font-medium">Phone Number</label>
           <input
             type="text"
-            name="phone"
-            value={activeTab === 'regular' ? regularData.phone : srsData.phone}
+            name="phoneNumber"
+            value={activeTab === 'regular' ? regularData.phoneNumber : srsData.phoneNumber}
             onChange={activeTab === 'regular' ? handleRegularChange : handleSrsChange}
-            className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-white border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 placeholder-white focus:outline-none focus:ring-2 focus:ring-white/30"
             placeholder="Enter phone number"
             required
           />
@@ -94,7 +152,7 @@ export default function RegisterSubscriber() {
             name="referral"
             value={activeTab === 'regular' ? regularData.referral : srsData.referral}
             onChange={activeTab === 'regular' ? handleRegularChange : handleSrsChange}
-            className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-white border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 placeholder-white focus:outline-none focus:ring-2 focus:ring-white/30"
             placeholder="Enter referral name or code"
             required
           />
@@ -107,16 +165,16 @@ export default function RegisterSubscriber() {
             onChange={activeTab === 'regular' ? handleRegularChange : handleSrsChange}
             className="w-full bg-white/20 border border-white/30 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/30"
           >
-            <option label='select type'></option>
-            <option value="half-day-morning" className="text-black">Half-day (morning)</option>
-            <option value="half-day-night" className="text-black">Half-day (night)</option>
-            <option value="full-day" className="text-black">Full day</option>
-            <option value="weekly-day-only" className="text-black">Weekly (day-only)</option>
-            <option value="weekly-full-access" className="text-black">Weekly (full-access)</option>
-            <option value="bi-weekly-day-only" className="text-black">Bi-weekly (day-only)</option>
-            <option value="bi-weekly-full-access" className="text-black">Bi-weekly (full-access)</option>
-            <option value="monthly-day-only" className="text-black">Monthly (day-only)</option>
-            <option value="monthly-full-access" className="text-black">Monthly (full-access)</option>
+            <option label="Select type"></option>
+            <option value="Half-day (morning)" className="text-black">Half-day (morning)</option>
+            <option value="Half-day (night)" className="text-black">Half-day (night)</option>
+            <option value="Full day" className="text-black">Full day</option>
+            <option value="Weekly (day-only)" className="text-black">Weekly (day-only)</option>
+            <option value="Weekly (full-access)" className="text-black">Weekly (full-access)</option>
+            <option value="Bi-weekly (day-only)" className="text-black">Bi-weekly (day-only)</option>
+            <option value="Bi-weekly (full-access)" className="text-black">Bi-weekly (full-access)</option>
+            <option value="Monthly (day-only)" className="text-black">Monthly (day-only)</option>
+            <option value="Monthly (full-access)" className="text-black">Monthly (full-access)</option>
           </select>
         </div>
 
@@ -144,6 +202,7 @@ export default function RegisterSubscriber() {
             className="w-full p-3 rounded-lg bg-white/10 text-white border border-white/30 cursor-not-allowed"
           />
         </div>
+
         <div>
           <label className="block mb-1 text-sm font-medium">Profile Image</label>
           <input
@@ -152,19 +211,28 @@ export default function RegisterSubscriber() {
             onChange={handleImageChange}
             className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none"
           />
-          {/* Preview Image necessary? */}
-          {/* {image && <img src={image} alt="Preview" className="mt-4 h-28 w-28 object-cover rounded-full border-2 border-white/30" />} */}
         </div>
 
         <div>
           <button
             type="submit"
-            className="w-full bg-white text-black font-semibold py-3 rounded-lg hover:bg-gray-200 transition shadow-md"
+            disabled={loading}
+            className={`w-full bg-white text-black font-semibold py-3 rounded-lg transition shadow-md flex items-center justify-center gap-2 ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-gray-200'}`}
           >
-            Register Subscriber
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Registering...
+              </>
+            ) : (
+              'Register Subscriber'
+            )}
           </button>
         </div>
       </form>
+
+      {/* Toast Notification */}
+      {toast.message && <Toast message={toast.message} type={toast.type} />}
     </div>
   );
 }

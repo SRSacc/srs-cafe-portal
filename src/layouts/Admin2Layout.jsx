@@ -1,28 +1,35 @@
-import { useState, useEffect } from 'react'; 
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, UserPlus, Users, Bell, Menu, LogOut } from 'lucide-react';
-import Logo from '../assets/SRSLogoWhite.svg';
-import { useNotifications } from '../context/NotificationContext';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
 import { fetchUserData } from '../api/auth';
+import Logo from "../assets/SRSLogoWhite.svg";
+import {
+  Settings,
+  Database,
+  Users,
+  Bell,
+  LogOut,
+  Menu
+} from "lucide-react";
 
 const navItems = [
-  { name: 'Dashboard', path: '/admin1/dashboard', icon: <Users size={18} /> },
-  { name: 'Register', path: '/admin1/register', icon: <UserPlus size={18} /> },
-  { name: 'Notifications', path: '/admin1/notifications', icon: <Bell size={18} /> },
+  { name: 'System Config', path: '/admin2/system', icon: <Settings size={20} /> },
+  { name: 'Database', path: '/admin2/database', icon: <Database size={20} /> },
+  { name: 'User Management', path: '/admin2/users', icon: <Users size={20} /> },
+  { name: 'Notifications', path: '/admin2/notifications', icon: <Bell size={20} /> },
 ];
 
-export default function Admin1Layout() {
+export default function Admin2Layout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userName, setUser] = useState('');
-  const { newCount } = useNotifications();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
 
+
+  // Fetch user information after component mounts
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      setIsLoading(true);
       fetchUserData(token)
         .then((response) => {
           const userInfo = `${response.data.username} (${response.data.role})`;
@@ -31,9 +38,6 @@ export default function Admin1Layout() {
         .catch((error) => {
           console.error("Error loading user", error);
           setUser('Unknown User');
-        })
-        .finally(() => {
-          setIsLoading(false);
         });
     }
   }, []);
@@ -67,7 +71,7 @@ export default function Admin1Layout() {
       <aside className={`fixed lg:static top-0 left-0 z-40 h-full w-64 bg-black p-6 flex flex-col justify-between border-r border-white/10 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div>
           <div className="flex items-center gap-3 mb-10">
-            <img src={Logo} alt="SRS Café Logo" className="w-12 h-12" />
+            <img src={Logo} alt="SRS Logo" className="w-12 h-12" />
             <h1 className="text-xl font-semibold tracking-wide">SRS Café</h1>
           </div>
           <nav className="space-y-2">
@@ -77,31 +81,27 @@ export default function Admin1Layout() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`relative flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive ? 'bg-white text-black font-medium' : 'hover:bg-gray-800 text-white'}`}
+                  className={`relative flex items-center gap-3 px-4 py-2 rounded-lg transition ${
+                    isActive ? 'bg-white text-black font-medium' : 'hover:bg-gray-900 text-white'
+                  }`}
                   onClick={() => setSidebarOpen(false)}
                 >
                   {item.icon}
-                  {item.name}
-
-                  {/* Show badge for Notifications only if new notifications exist */}
-                  {item.name === 'Notifications' && newCount > 0 && (
-                    <span className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
-                      {newCount}
-                    </span>
-                  )}
+                  <span>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
         </div>
-
-        {/* Logout Button */}
-        <div className="mt-4 text-sm text-white">
-          <p className="font-medium">Logged in: {userName || 'Loading...'}</p>
-          <button onClick={handleLogout} className="mt-2 bg-red-600 text-white py-1 px-3 rounded-lg hover:bg-red-700 transition">
-            <LogOut size={16} className="inline-block mr-2" />
-            Logout
-          </button>
+        {/* Logout Button section */}
+        <div>
+          <div className="mt-4 text-sm text-white">
+            <p className="font-medium">Logged in: {userName || 'Loading...'}</p>
+            <button onClick={handleLogout} className="mt-2 bg-red-600 text-white py-1 px-3 rounded-lg hover:bg-red-700 transition">
+              <LogOut size={16} className="inline-block mr-2" />
+              Logout
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -114,6 +114,7 @@ export default function Admin1Layout() {
           </h2>
         </header>
 
+        {/* Page Content */}
         <main className="py-4 px-8">
           <Outlet />
         </main>

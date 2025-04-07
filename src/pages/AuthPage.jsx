@@ -1,32 +1,105 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import Logo from "../assets/SRSLogoWhite.svg";
 import Ambassador from "../assets/Ambassador.png";
-
+import { loginUser } from '../api/auth';
+import { LogIn, Loader2 } from "lucide-react"; 
+import Toast from '../components/common/Toast';
 
 export default function AuthPage() {
   const [role, setRole] = useState("admin1");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [userRole, setUserRole] = useState(null);
+  const [showToast, setShowToast] = useState(false);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (role === "admin1" && username && password) {
+  // Check if the user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
       setIsLoggedIn(true);
+    }
+  }, []);
+
+  // Add loading state
+  const [loading, setLoading] = useState(false);
+  
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
+    setShowToast(false);
+    setLoading(true); // Start loading
+
+    try {
+      const data = await loginUser({ username, password, role });
+      
+      if (!data || !data.role) {
+        setErrorMessage("Invalid response from server");
+        setShowToast(true);
+        return;
+      }
+
+      // Check if user has permission for selected role
+      const userRole = data.role.toLowerCase();
+      const selectedRole = role.toLowerCase();
+      
+      const roleMapping = {
+        admin1: 'receptionist',
+        admin2: 'manager',
+        worker: 'subscriber'
+      };
+
+      const hasAccess = 
+        userRole === 'manager' || // manager can access all roles
+        (userRole === roleMapping[selectedRole]); // other roles must match exactly
+
+      if (!hasAccess) {
+        setErrorMessage(`Access denied. You cannot login as ${role}.`);
+        setShowToast(true);
+        return;
+      }
+
+      // If access is granted, proceed with login
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data));
+      setUserRole(userRole);
+      setIsLoggedIn(true);
+
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrorMessage("Invalid username or password.");
+      setShowToast(true);
+    } finally {
+      setLoading(false); // Stop loading regardless of outcome
     }
   };
 
   if (isLoggedIn) {
-    return <Navigate to="/admin1/dashboard" />;
+    const dashboardRoutes = {
+      admin1: '/admin1/dashboard',
+      admin2: '/admin2/system',
+      worker: '/worker/dashboard'
+    };
+    return <Navigate to={dashboardRoutes[role]} replace />;
   }
 
   return (
     <div className="relative h-full md:h-screen w-full bg-black text-white overflow-hidden">
+      {/* Show toast if there's an error */}
+      {showToast && errorMessage && (
+        <Toast 
+          message={errorMessage} 
+          type="error" 
+          onClose={() => setShowToast(false)} 
+        />
+      )}
+
       {/* Top Left Logo */}
-        <div className="sticky md:absolute top-2 left-2 z-20 ">
-            <img src={Logo} alt="SRS Café Logo" className="w-24 sm:w-28" />
-        </div>
+      <div className="sticky md:absolute top-2 left-2 z-20 ">
+        <img src={Logo} alt="SRS Café Logo" className="w-24 sm:w-28" />
+      </div>
 
       {/* Background Image */}
       <img
@@ -50,7 +123,6 @@ export default function AuthPage() {
           </div>
 
           {/* Right Side Form */}
-
           <div className="md:w-1/2 w-full bg-[#f5f5f5] text-black  lg:text-xl p-10 sm:p-6 flex flex-col justify-center rounded-2xl">
             <div className="text-center pb-6 flex flex-col justify-center">
               <h2 className="text-4xl sm:text-5xl font-bold mb-2 leading-snug">Login</h2>
@@ -58,56 +130,62 @@ export default function AuthPage() {
             {/* Role Tabs */}
             <div className="flex justify-between w-full mb-6 text-sm sm:text-base">
               {["worker", "admin1", "admin2"].map((r) => (
-                <button 
+                <button
                   key={r}
-                  className={`w-1/3 px-2 py-2 sm:px-4 rounded-lg transition font-medium md:font-small text-nowrap ${
-                    role === r ? "bg-black text-white" : "text-black"
-                  }`}
+                  className={`w-1/3 px-2 py-2 sm:px-4 rounded-lg transition font-medium md:font-small text-nowrap ${role === r ? "bg-black text-white" : "text-black"
+                    }`}
                   onClick={() => setRole(r)}
                 >
-                  {/* Consider adding icons here later */}
                   {r === "admin1" ? "Admin 1" : r === "admin2" ? "Admin 2" : "Worker"}
                 </button>
-              ))}              
+              ))}
             </div>
 
-            {/* Login Form (Admin 1 only for now) */}
-            {role === "admin1" ? (
-              <form onSubmit={handleLogin}>
-                <div className="mb-4">
-                  <label className="block mb-1 font-medium">Username</label>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full p-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none"
-                    placeholder="Enter your username"
-                    required
-                  />
-                </div>
-                <div className="mb-6">
-                  <label className="block mb-1 font-medium">Password</label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none"
-                    placeholder="Enter your password"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-black text-white font-semibold py-2 rounded-lg hover:bg-gray-800 transition"
-                >
-                  Login
-                </button>
-              </form>
-            ) : (
-              <div className="text-center text-gray-500">
-                <p>Login for this role is not available yet.</p>
+            {/* Login Form for all roles */}
+            <form onSubmit={handleLogin}>
+              <div className="mb-4">
+                <label className="block mb-1 font-medium">Username</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full p-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none"
+                  placeholder="Enter your username"
+                  required
+                />
               </div>
-            )}
+              <div className="mb-6">
+                <label className="block mb-1 font-medium">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full bg-black text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 ${
+                  loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-gray-800'
+                } transition`}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Logging in...
+                  </>
+                ) : (
+                  <>
+                    <LogIn size={18} />
+                    Login
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         </div>
       </div>

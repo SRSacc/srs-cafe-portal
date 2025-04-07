@@ -1,28 +1,48 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
-import AdminDashboard from './pages/AdminDashboard';
 import Admin1Layout from './layouts/Admin1Layout';
+import Admin2Layout from './layouts/Admin2Layout';
+import WorkerLayout from './layouts/WorkerLayout';
 import RegisterSubscriber from './pages/RegisterSubscriber';
 import Subscribers from './pages/Subscribers';
 import Notifications from './pages/Notifications';
+import WorkHours from './pages/WorkHours';
+import Subscription from './pages/Subscription';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<AuthPage />} />
-        <Route path="/admin1" element={<Admin1Layout />}>
-        {/**
-         * NOTE: switched admin dashboard from AdminDashboard.jsx to
-         * Subscribers.jsx.
-         */}
-          {/* <Route path="admin2" element={<AdminDashboard/>} /> */}
-          <Route path="dashboard" element={<Subscribers />} />
-          <Route path="register" element={<RegisterSubscriber />} />
-          <Route path="notifications" element={<Notifications />} />
-        </Route>
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<AuthPage />} />
+
+          {/* Admin1 Routes */}
+          <Route path="/admin1" element={<Admin1Layout />}>
+            <Route path="dashboard" element={<Subscribers />} />
+            <Route path="register" element={<RegisterSubscriber />} />
+            <Route path="notifications" element={<Notifications />} />
+          </Route>
+
+          {/* Admin2 Routes */}
+          <Route path="/admin2" element={<Admin2Layout />}>
+            <Route path="dashboard" element={<Subscribers />} />
+            <Route path="system" element={<Notifications />} />
+            <Route path="database" element={<Notifications />} />
+            <Route path="users" element={<Notifications />} />
+            <Route path="notifications" element={<Notifications />} />
+          </Route>
+
+          {/* Worker Routes */}
+          <Route path="/worker" element={<WorkerLayout />}>
+            <Route path="dashboard" element={<WorkHours />} />
+            <Route path="hours" element={<WorkHours />} />
+            <Route path="subscription" element={<Subscription />} />
+            <Route path="notifications" element={<Notifications />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

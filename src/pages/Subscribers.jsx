@@ -1,56 +1,65 @@
+import { Users, UserCheck, Clock, AlertTriangle } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Edit, Trash2, X } from 'lucide-react';
+import { getSubscribers, updateSubscriber, deleteSubscriber } from '../api/subscriber';
 
-const initialSubscribers = [
-  {
-    id: 1,
-    name: 'Jane Doe',
-    image: '/avatar1.png',
-    status: 'active',
-    expiresOn: '2025-04-05',
-    type: 'srs',
-  },
-  {
-    id: 2,
-    name: 'Emmanuel Ogorchukwu N',
-    image: '/avatar2.png',
-    status: 'expiring',
-    expiresOn: '2025-03-29',
-    type: 'regular',
-  },
-  {
-    id: 3,
-    name: 'Chidinma Ugochukwu',
-    image: '/avatar3.png',
-    status: 'expired',
-    expiresOn: '2025-03-20',
-    type: 'srs',
-  },
-  {
-    id: 4,
-    name: 'Tony Richards',
-    image: '/avatar4.png',
-    status: 'active',
-    expiresOn: '2025-05-05',
-    type: 'regular',
-  },
-  {
-    id: 5,
-    name: 'Tony Richards',
-    image: '/avatar4.png',
-    status: 'active',
-    expiresOn: '2025-05-05',
-    type: 'regular',
-  },
-  {
-    id: 6,
-    name: 'Tony Richards',
-    image: '/avatar4.png',
-    status: 'active',
-    expiresOn: '2025-05-05',
-    type: 'regular',
-  },
-];
+// const initialSubscribers = [
+//   {
+//     id: 1,
+//     name: 'Jane Doe',
+//     image: '/avatar1.png',
+//     status: 'active',
+//     expiresOn: '2025-04-05',
+//     type: 'srs',
+//     subscriptionType: 'monthly-full-access'
+//   },
+//   {
+//     id: 2,
+//     name: 'Emmanuel Ogorchukwu N',
+//     image: '/avatar2.png',
+//     status: 'expiring',
+//     expiresOn: '2025-03-29',
+//     type: 'regular',
+//     subscriptionType: 'weekly-day-only'
+//   },
+//   {
+//     id: 3,
+//     name: 'Chidinma Ugochukwu',
+//     image: '/avatar3.png',
+//     status: 'expired',
+//     expiresOn: '2025-03-20',
+//     type: 'srs',
+//     subscriptionType: 'bi-weekly-full-access'
+//   },
+//   {
+//     id: 4,
+//     name: 'Tony Richards',
+//     image: '/avatar4.png',
+//     status: 'active',
+//     expiresOn: '2025-05-05',
+//     type: 'regular',
+//     subscriptionType: 'monthly-day-only'
+//   },
+//   {
+//     id: 5,
+//     name: 'Tony Richards',
+//     image: '/avatar4.png',
+//     status: 'active',
+//     expiresOn: '2025-05-05',
+//     type: 'regular',
+//     subscriptionType: 'daily'
+//   },
+//   {
+//     id: 6,
+//     name: 'Tony Richards',
+//     image: '/avatar4.png',
+//     status: 'active',
+//     expiresOn: '2025-05-05',
+//     type: 'regular',
+//     subscriptionType: 'half-day-morning'
+//   },
+// ];
+
 
 const statusColors = {
   active: 'bg-green-600',
@@ -60,59 +69,156 @@ const statusColors = {
 
 function Toast({ message }) {
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-lg shadow-lg border border-white/20 animate-fade-in-up">
+    <div className="fixed bottom-4 right-4 z-50 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-lg shadow-lg border border-white/30 animate-fade-in-up">
       {message}
     </div>
   );
 };
 
 
+
 export default function Subscribers() {
-  const [subscribers, setSubscribers] = useState(initialSubscribers);
+  const [subscribers, setSubscribers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  // const [editingSub, setEditingSub] = useState(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [editModal, setEditModal] = useState(null);
   const [deleteModal, setDeleteModal] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
   const [showSubscriptionFilter, setShowSubscriptionFilter] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
   const [subscriptionFilter, setSubscriptionFilter] = useState('all');
   const filterRef = useRef(null);
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const hoverTimerRef = useRef(null);
 
 
   const filteredSubscribers = subscribers.filter((sub) => {
-    const matchName = sub.name.toLowerCase().includes(search.toLowerCase());
+    if (!sub || !sub.subscriberDetails) return false;
+    
+    const matchName = sub.subscriberDetails.name?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filter === 'all' || sub.status === filter;
-    const matchSubscription =
-      subscriptionFilter === 'all' || sub.subscriptionType === subscriptionFilter;
+    const matchSubscription = 
+      subscriptionFilter === 'all' || 
+      subscriptionFilter === '' || 
+      (sub.subscriberDetails.subscriptionType && 
+       sub.subscriberDetails.subscriptionType.toLowerCase() === subscriptionFilter.toLowerCase());
     return matchName && matchStatus && matchSubscription;
   });
 
 
-  const handleSaveEdit = () => {
-    setSubscribers((prev) =>
-      prev.map((sub) =>
-        sub.id === editModal.id
-          ? {
-            ...sub,
-            name: editModal.name,
-            subscriptionType: editModal.subscriptionType,
-            paymentMode: editModal.paymentMode,
-          }
-          : sub
-      )
-    );
-    setEditModal(null);
-    setToastMessage('Subscriber updated successfully!');
-    setTimeout(() => setToastMessage(''), 3000);
+  // Add this handler for image upload
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        setEditModal({ ...editModal, newImage: file });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
+  // Update handleSaveEdit to include image handling
+  // const handleSaveEdit = () => {
+  //   setSubscribers((prev) =>
+  //     prev.map((sub) =>
+  //       sub.id === editModal.id
+  //         ? {
+  //           ...sub,
+  //           name: editModal.name,
+  //           subscriptionType: editModal.subscriptionType,
+  //           paymentMode: editModal.paymentMode,
+  //           image: imagePreview || sub.image, // Use new image if uploaded
+  //         }
+  //         : sub
+  //     )
+  //   );
+  //   setEditModal(null);
+  //   setImagePreview(null);
+  //   setToastMessage('Subscriber updated successfully!');
+  //   setTimeout(() => setToastMessage(''), 3000);
+  // };
 
-  const handleConfirmDelete = () => {
-    setSubscribers((prev) => prev.filter((sub) => sub.id !== deleteModal.id));
-    setDeleteModal(null);
-    setToastMessage('Subscriber deleted.');
-    setTimeout(() => setToastMessage(''), 3000);
+  // Update handleSaveEdit function
+  const handleSaveEdit = async () => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('name', editModal.name);
+      formData.append('subscriptionType', editModal.subscriptionType);
+      formData.append('paymentMode', editModal.paymentMode);
+      
+      if (editModal.newImage) {
+        formData.append('image', editModal.newImage);
+      }
+
+      await updateSubscriber(editModal.id, formData);
+      
+      // Refresh subscribers list
+      const updatedSubscribers = await getSubscribers();
+      setSubscribers(updatedSubscribers);
+      
+      setEditModal(null);
+      setImagePreview(null);
+      setToastMessage('Subscriber updated successfully!');
+    } catch (error) {
+      setToastMessage('Failed to update subscriber: ' + error.message);
+    } finally {
+      setLoading(false);
+      setTimeout(() => setToastMessage(''), 3000);
+    }
   };
+
+  const handleCardHover = (subscriberId, isHovering) => {
+    if (isHovering) {
+      hoverTimerRef.current = setTimeout(() => {
+        setHoveredCard(subscriberId);
+      }, 10000); // 10 seconds
+    } else {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
+      setHoveredCard(null);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
+    };
+  }, []);  
+
+  // const handleConfirmDelete = () => {
+  //   setSubscribers((prev) => prev.filter((sub) => sub.id !== deleteModal.id));
+  //   setDeleteModal(null);
+  //   setToastMessage('Subscriber deleted.');
+  //   setTimeout(() => setToastMessage(''), 3000);
+  // };
+
+  const handleConfirmDelete = async () => {
+    try {
+      setLoading(true);
+      await deleteSubscriber(deleteModal.id);
+      
+      // Refresh subscribers list
+      const updatedSubscribers = await getSubscribers();
+      setSubscribers(updatedSubscribers);
+      
+      setDeleteModal(null);
+      setToastMessage('Subscriber deleted successfully.');
+    } catch (error) {
+      setToastMessage('Failed to delete subscriber: ' + error.message);
+    } finally {
+      setLoading(false);
+      setTimeout(() => setToastMessage(''), 3000);
+    }
+  }; 
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -125,9 +231,96 @@ export default function Subscribers() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+    // Add fetch subscribers effect
+    useEffect(() => {
+      const fetchSubscribers = async () => {
+        try {
+          setLoading(true);
+          const data = await getSubscribers();
+          console.log('Received subscribers:', data); // Log the received data
+          setSubscribers(data);
+        } catch (err) {
+          setError(err.message);
+          setToastMessage('Failed to load subscribers: ' + err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchSubscribers();
+    }, []);
+  
+    // Add loading state check before the return statement
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+        </div>
+      );
+    }
+  // Update the stats calculation
+  const stats = {
+    totalActive: subscribers.filter(sub => sub.status === 'active').length,
+    expiredSubscribers: subscribers.filter(sub => sub.status === 'expired').length,
+    expiringNext7Days: subscribers.filter(sub => sub.status === 'expiring').length,
+    recentRegistrations: subscribers.filter(sub => {
+      const registrationDate = new Date(sub.subscriberDetails?.createdAt);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      return registrationDate >= sevenDaysAgo;
+    }).length
+  };
 
+  // Update the stats grid in the return statement
   return (
-    <div className="text-white">
+    <div className="text-white space-y-6">
+      {/* Stats Grid */}
+      <div className="flex w-90% md:w-auto sm:grid sm:grid-cols-4 gap-2 sm:gap-4 overflow-x-auto pb-2 sm:pb-0">
+        {/* Active Subscribers */}
+        <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-6 rounded-xl flex-shrink-0 w-1/4 md:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-green-400" />
+            <div className="lg:block">
+              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">Active Subscribers</p>
+              <h3 className="text-base sm:text-lg lg:text-2xl font-bold">{stats.totalActive}</h3>
+            </div>
+          </div>
+        </div>
+
+        {/* Expiring Soon */}
+        <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-6 rounded-xl flex-shrink-0 w-1/4 sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-yellow-400" />
+            <div className="lg:block">
+              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">Expiring Soon</p>
+              <h3 className="text-base sm:text-lg lg:text-2xl font-bold">{stats.expiringNext7Days}</h3>
+            </div>
+          </div>
+        </div>
+
+        {/* Expired Subscribers */}
+        <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-6 rounded-xl flex-shrink-0 w-1/4 sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <UserCheck className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-red-400" />
+            <div className="lg:block">
+              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">Expired Subscribers</p>
+              <h3 className="text-base sm:text-lg lg:text-2xl font-bold">{stats.expiredSubscribers}</h3>
+            </div>
+          </div>
+        </div>
+
+        {/* New This Week */}
+        <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-6 rounded-xl flex-shrink-0 w-1/4 sm:w-auto">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-purple-400" />
+            <div className="lg:block">
+              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">New This Week</p>
+              <h3 className="text-base sm:text-lg lg:text-2xl font-bold">{stats.recentRegistrations}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         {/* Search Box with Filter Icon */}
@@ -163,26 +356,23 @@ export default function Subscribers() {
                 onChange={(e) => setSubscriptionFilter(e.target.value)}
                 className="w-full bg-white/10 border border-white/30 text-white p-2 rounded-lg focus:outline-none appearance-none"
               >
-
-
-                <option label='select type'></option>
+                <option value="all" className="text-black">All Types</option>
                 <option value="half-day-morning" className="text-black">Half-day (morning)</option>
                 <option value="half-day-night" className="text-black">Half-day (night)</option>
-                <option value="full-day" className="text-black">Full day</option>
+                <option value="daily" className="text-black">Full day</option>
                 <option value="weekly-day-only" className="text-black">Weekly (day-only)</option>
                 <option value="weekly-full-access" className="text-black">Weekly (full-access)</option>
                 <option value="bi-weekly-day-only" className="text-black">Bi-weekly (day-only)</option>
                 <option value="bi-weekly-full-access" className="text-black">Bi-weekly (full-access)</option>
                 <option value="monthly-day-only" className="text-black">Monthly (day-only)</option>
                 <option value="monthly-full-access" className="text-black">Monthly (full-access)</option>
-
               </select>
             </div>
           )}
         </div>
 
         {/* Status Filters (All / Active / Expiring / Expired) */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 md:flex-nowrap flex-wrap">
           {['all', 'active', 'expiring', 'expired'].map((status) => (
             <button
               key={status}
@@ -202,40 +392,92 @@ export default function Subscribers() {
       {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
         {filteredSubscribers.map((sub) => (
-
           <div
-            key={sub.id}
-            className="relative bg-white/10 backdrop-blur-md rounded-xl shadow-md p-5 flex flex-col justify-between text-center hover:shadow-lg transition group h-50"
+            key={sub._id}
+            className="relative bg-white/10 backdrop-blur-md rounded-xl shadow-md p-5 flex flex-col justify-between text-center hover:shadow-lg transition group h-50" 
+            onMouseEnter={() => handleCardHover(sub._id, true)} 
+            onMouseLeave={() => handleCardHover(sub._id, false)}
           >
-
             {/* Worker Type Badge */}
             <span className="absolute top-2 left-2 bg-white/20 text-white text-xs px-2 py-1 rounded-full font-medium shadow-md">
-              {sub.type === 'srs' ? 'SRS' : 'REG'}
+              {sub.subscriberDetails?.workerType === 'srs' ? 'SRS' : 'REG'}
             </span>
 
             <div className="flex flex-col justify-start items-center flex-grow">
               <img
-                src={sub.image}
-                alt={sub.name}
+                src={sub.subscriberDetails?.image || '/default-avatar.png'}
+                alt={sub.subscriberDetails?.name}
                 className="w-28 h-28 rounded-full object-cover border-4 border-white/20"
               />
               <h3
                 className="text-lg font-semibold mt-2 max-w-full truncate"
-                title={sub.name}
+                title={sub.subscriberDetails?.name}
               >
-                {sub.name}
+                {sub.subscriberDetails?.name}
               </h3>
-
             </div>
 
             {/* Footer Section: Status + Expiry */}
             <div className="mt-5 space-y-1 h-[50px] flex flex-col justify-center items-center">
-              <span className={`px-3 py-1 text-xs rounded-full ${statusColors[sub.status]}`}>
-                {sub.status === 'expiring' ? 'Expiring Soon' : sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
+              <span className={`px-3 py-1 text-xs rounded-full ${statusColors[sub.subscriberDetails?.status || 'active']}`}>
+                {(sub.subscriberDetails?.status || 'active').charAt(0).toUpperCase() + (sub.subscriberDetails?.status || 'active').slice(1)}
               </span>
-              <p className="text-xs text-gray-300">Expires on: {sub.expiresOn}</p>
+              <p className="text-xs text-gray-300">Expires on: {sub.subscriberDetails?.expiresOn || 'N/A'}</p>
             </div>
 
+            {/* Rest of the card code... */}
+{/* Detailed Info Overlay */}
+{hoveredCard === sub.id && (
+  <div className="absolute inset-0 bg-gray-900/90 backdrop-blur-xl sm:hidden rounded-xl p-4 transform transition-all duration-300 ease-in-out z-10">
+    <div className="h-full flex flex-col justify-between">
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <img
+            src={sub.image}
+            alt={sub.name}
+            className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
+          />
+          <div className="text-left">
+            <h3 className="font-semibold text-lg">{sub.name}</h3>
+            <span className={`px-2 py-0.5 text-xs rounded-full ${statusColors[sub.status]}`}>
+              {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
+            </span>
+          </div>
+        </div>
+
+        <div className="text-left space-y-2">
+          <div>
+            <p className="text-xs text-gray-400">Subscription Type</p>
+            <p className="text-sm">{sub.subscriptionType.replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Worker Type</p>
+            <p className="text-sm">{sub.type.toUpperCase()}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Expiration Date</p>
+            <p className="text-sm">{sub.expiresOn}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => setEditModal({ ...sub })}
+          className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-sm"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => setDeleteModal(sub)}
+          className="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1 rounded-lg text-sm"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
             {/* Hover Actions */}
             <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
               <button
@@ -296,11 +538,15 @@ export default function Subscribers() {
                   onChange={(e) => setEditModal({ ...editModal, subscriptionType: e.target.value })}
                   className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none"
                 >
-                  <option className="text-black" value="half-day">Half-day</option>
-                  <option className="text-black" value="full-day">Full day</option>
-                  <option className="text-black" value="weekly">Weekly</option>
-                  <option className="text-black" value="bi-weekly">Bi-weekly</option>
-                  <option className="text-black" value="monthly">Monthly</option>
+                  <option className="text-black" value="half-day-morning">Half-day (Morning)</option>
+                  <option className="text-black" value="half-day-night">Half-day (Night)</option>
+                  <option className="text-black" value="daily">Daily</option>
+                  <option className="text-black" value="weekly-day-only">Weekly (Day Only)</option>
+                  <option className="text-black" value="weekly-full-access">Weekly (Full Access)</option>
+                  <option className="text-black" value="bi-weekly-day-only">Bi-weekly (Day Only)</option>
+                  <option className="text-black" value="bi-weekly-full-access">Bi-weekly (Full Access)</option>
+                  <option className="text-black" value="monthly-day-only">Monthly (Day Only)</option>
+                  <option className="text-black" value="monthly-full-access">Monthly (Full Access)</option>
                 </select>
               </div>
 
@@ -316,6 +562,28 @@ export default function Subscribers() {
                   <option className="text-black" value="company">Company</option>
                 </select>
               </div>
+
+              {/* Save Button */}
+              {/* Image Upload */}
+                            <div>
+                              <label className="block mb-1 text-sm font-medium">Profile Image</label>
+                              <div className="flex items-center gap-4">
+                                <img
+                                  src={imagePreview || editModal.image}
+                                  alt={editModal.name}
+                                  className="w-20 h-20 rounded-full object-cover border-2 border-white/30"
+                                />
+                                <div className="flex-1">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    className="w-full p-2 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
+                                  />
+                                  <p className="text-xs text-gray-400 mt-1">Recommended: Square image, max 5MB</p>
+                                </div>
+                              </div>
+                            </div>
 
               {/* Save Button */}
               <button
