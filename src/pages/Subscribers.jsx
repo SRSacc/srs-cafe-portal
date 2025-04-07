@@ -96,15 +96,16 @@ export default function Subscribers() {
 
 
   const filteredSubscribers = subscribers.filter((sub) => {
-    if (!sub || !sub.subscriberDetails) return false;
+    if (!sub) return false;
     
-    const matchName = sub.subscriberDetails.name?.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filter === 'all' || sub.status === filter;
+    const subscriberName = sub.subscriberDetails?.fullName || sub.subscriberDetails?.name || '';
+    const matchName = subscriberName.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = filter === 'all' || sub.subscriberDetails?.status === filter;
     const matchSubscription = 
       subscriptionFilter === 'all' || 
       subscriptionFilter === '' || 
-      (sub.subscriberDetails.subscriptionType && 
-       sub.subscriberDetails.subscriptionType.toLowerCase() === subscriptionFilter.toLowerCase());
+      (sub.subscriberDetails?.subscriptionType?.toLowerCase() === subscriptionFilter.toLowerCase());
+
     return matchName && matchStatus && matchSubscription;
   });
 
@@ -151,17 +152,17 @@ export default function Subscribers() {
       formData.append('name', editModal.name);
       formData.append('subscriptionType', editModal.subscriptionType);
       formData.append('paymentMode', editModal.paymentMode);
-      
+
       if (editModal.newImage) {
         formData.append('image', editModal.newImage);
       }
 
       await updateSubscriber(editModal.id, formData);
-      
+
       // Refresh subscribers list
       const updatedSubscribers = await getSubscribers();
       setSubscribers(updatedSubscribers);
-      
+
       setEditModal(null);
       setImagePreview(null);
       setToastMessage('Subscriber updated successfully!');
@@ -192,7 +193,7 @@ export default function Subscribers() {
         clearTimeout(hoverTimerRef.current);
       }
     };
-  }, []);  
+  }, []);
 
   // const handleConfirmDelete = () => {
   //   setSubscribers((prev) => prev.filter((sub) => sub.id !== deleteModal.id));
@@ -205,11 +206,11 @@ export default function Subscribers() {
     try {
       setLoading(true);
       await deleteSubscriber(deleteModal.id);
-      
+
       // Refresh subscribers list
       const updatedSubscribers = await getSubscribers();
       setSubscribers(updatedSubscribers);
-      
+
       setDeleteModal(null);
       setToastMessage('Subscriber deleted successfully.');
     } catch (error) {
@@ -218,7 +219,7 @@ export default function Subscribers() {
       setLoading(false);
       setTimeout(() => setToastMessage(''), 3000);
     }
-  }; 
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -231,40 +232,40 @@ export default function Subscribers() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-    // Add fetch subscribers effect
-    useEffect(() => {
-      const fetchSubscribers = async () => {
-        try {
-          setLoading(true);
-          const data = await getSubscribers();
-          console.log('Received subscribers:', data); // Log the received data
-          setSubscribers(data);
-        } catch (err) {
-          setError(err.message);
-          setToastMessage('Failed to load subscribers: ' + err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchSubscribers();
-    }, []);
-  
-    // Add loading state check before the return statement
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-        </div>
-      );
-    }
+  // Add fetch subscribers effect
+  useEffect(() => {
+    const fetchSubscribers = async () => {
+      try {
+        setLoading(true);
+        const data = await getSubscribers();
+        console.log('Received subscribers:', data); // Log the received data
+        setSubscribers(data);
+      } catch (err) {
+        setError(err.message);
+        setToastMessage('Failed to load subscribers: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubscribers();
+  }, []);
+
+  // Add loading state check before the return statement
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
   // Update the stats calculation
   const stats = {
-    totalActive: subscribers.filter(sub => sub.status === 'active').length,
-    expiredSubscribers: subscribers.filter(sub => sub.status === 'expired').length,
-    expiringNext7Days: subscribers.filter(sub => sub.status === 'expiring').length,
+    totalActive: subscribers.filter(sub => sub.subscriberDetails?.status === 'active').length,
+    expiredSubscribers: subscribers.filter(sub => sub.subscriberDetails?.status === 'expired').length,
+    expiringNext7Days: subscribers.filter(sub => sub.subscriberDetails?.status === 'expiring').length,
     recentRegistrations: subscribers.filter(sub => {
-      const registrationDate = new Date(sub.subscriberDetails?.createdAt);
+      const registrationDate = new Date(sub.createdAt);
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       return registrationDate >= sevenDaysAgo;
@@ -320,7 +321,7 @@ export default function Subscribers() {
           </div>
         </div>
       </div>
-    
+
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         {/* Search Box with Filter Icon */}
@@ -394,8 +395,8 @@ export default function Subscribers() {
         {filteredSubscribers.map((sub) => (
           <div
             key={sub._id}
-            className="relative bg-white/10 backdrop-blur-md rounded-xl shadow-md p-5 flex flex-col justify-between text-center hover:shadow-lg transition group h-50" 
-            onMouseEnter={() => handleCardHover(sub._id, true)} 
+            className="relative bg-white/10 backdrop-blur-md rounded-xl shadow-md p-5 flex flex-col justify-between text-center hover:shadow-lg transition group h-50"
+            onMouseEnter={() => handleCardHover(sub._id, true)}
             onMouseLeave={() => handleCardHover(sub._id, false)}
           >
             {/* Worker Type Badge */}
@@ -417,7 +418,7 @@ export default function Subscribers() {
               </h3>
             </div>
 
-            {/* Footer Section: Status + Expiry */}
+            {/* Card Footer Section: Status + Expiry */}
             <div className="mt-5 space-y-1 h-[50px] flex flex-col justify-center items-center">
               <span className={`px-3 py-1 text-xs rounded-full ${statusColors[sub.subscriberDetails?.status || 'active']}`}>
                 {(sub.subscriberDetails?.status || 'active').charAt(0).toUpperCase() + (sub.subscriberDetails?.status || 'active').slice(1)}
@@ -426,58 +427,58 @@ export default function Subscribers() {
             </div>
 
             {/* Rest of the card code... */}
-{/* Detailed Info Overlay */}
-{hoveredCard === sub.id && (
-  <div className="absolute inset-0 bg-gray-900/90 backdrop-blur-xl sm:hidden rounded-xl p-4 transform transition-all duration-300 ease-in-out z-10">
-    <div className="h-full flex flex-col justify-between">
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <img
-            src={sub.image}
-            alt={sub.name}
-            className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
-          />
-          <div className="text-left">
-            <h3 className="font-semibold text-lg">{sub.name}</h3>
-            <span className={`px-2 py-0.5 text-xs rounded-full ${statusColors[sub.status]}`}>
-              {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
-            </span>
-          </div>
-        </div>
+            {/* Detailed Info Overlay */}
+            {hoveredCard === sub.id && (
+              <div className="absolute inset-0 bg-gray-900/90 backdrop-blur-xl sm:hidden rounded-xl p-4 transform transition-all duration-300 ease-in-out z-10">
+                <div className="h-full flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={sub.image}
+                        alt={sub.name}
+                        className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
+                      />
+                      <div className="text-left">
+                        <h3 className="font-semibold text-lg">{sub.name}</h3>
+                        <span className={`px-2 py-0.5 text-xs rounded-full ${statusColors[sub.status]}`}>
+                          {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
+                        </span>
+                      </div>
+                    </div>
 
-        <div className="text-left space-y-2">
-          <div>
-            <p className="text-xs text-gray-400">Subscription Type</p>
-            <p className="text-sm">{sub.subscriptionType.replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-400">Worker Type</p>
-            <p className="text-sm">{sub.type.toUpperCase()}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-400">Expiration Date</p>
-            <p className="text-sm">{sub.expiresOn}</p>
-          </div>
-        </div>
-      </div>
+                    <div className="text-left space-y-2">
+                      <div>
+                        <p className="text-xs text-gray-400">Subscription Type</p>
+                        <p className="text-sm">{sub.subscriptionType.replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Worker Type</p>
+                        <p className="text-sm">{sub.type.toUpperCase()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Expiration Date</p>
+                        <p className="text-sm">{sub.expiresOn}</p>
+                      </div>
+                    </div>
+                  </div>
 
-      <div className="flex justify-end gap-2">
-        <button
-          onClick={() => setEditModal({ ...sub })}
-          className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-sm"
-        >
-          Edit
-        </button>
-        <button
-          onClick={() => setDeleteModal(sub)}
-          className="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1 rounded-lg text-sm"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setEditModal({ ...sub })}
+                      className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setDeleteModal(sub)}
+                      className="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1 rounded-lg text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Hover Actions */}
             <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
               <button
@@ -565,25 +566,25 @@ export default function Subscribers() {
 
               {/* Save Button */}
               {/* Image Upload */}
-                            <div>
-                              <label className="block mb-1 text-sm font-medium">Profile Image</label>
-                              <div className="flex items-center gap-4">
-                                <img
-                                  src={imagePreview || editModal.image}
-                                  alt={editModal.name}
-                                  className="w-20 h-20 rounded-full object-cover border-2 border-white/30"
-                                />
-                                <div className="flex-1">
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    className="w-full p-2 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
-                                  />
-                                  <p className="text-xs text-gray-400 mt-1">Recommended: Square image, max 5MB</p>
-                                </div>
-                              </div>
-                            </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Profile Image</label>
+                <div className="flex items-center gap-4">
+                  <img
+                    src={imagePreview || editModal.image}
+                    alt={editModal.name}
+                    className="w-20 h-20 rounded-full object-cover border-2 border-white/30"
+                  />
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="w-full p-2 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Recommended: Square image, max 5MB</p>
+                  </div>
+                </div>
+              </div>
 
               {/* Save Button */}
               <button
@@ -625,5 +626,4 @@ export default function Subscribers() {
       {/* Toast Notification */}
       {toastMessage && <Toast message={toastMessage} />}
     </div>
-  );
-}
+  );}

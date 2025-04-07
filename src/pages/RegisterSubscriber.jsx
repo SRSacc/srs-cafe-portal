@@ -56,11 +56,11 @@ export default function RegisterSubscriber() {
     }
 
     const formData = new FormData();
-    formData.append('name', data.fullName);
+    formData.append('name', data.name);
     formData.append('phoneNumber', data.phoneNumber);
     formData.append('referral', data.referral);
     formData.append('subscriptionType', data.type);
-    formData.append('subscriberDetails[subscriberType]', activeTab === 'regular' ? 'Regular Subscriber' : 'SRS Worker');
+    formData.append('subscriberType', activeTab === 'regular' ? 'Regular Subscriber' : 'SRS Worker');
     formData.append('startDate', startDate);
     formData.append('workerType', activeTab);
 
