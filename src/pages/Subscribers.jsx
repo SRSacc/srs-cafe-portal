@@ -2,64 +2,7 @@ import { Users, UserCheck, Clock, AlertTriangle } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Edit, Trash2, X } from 'lucide-react';
 import { getSubscribers, updateSubscriber, deleteSubscriber } from '../api/subscriber';
-import  avatar from '../assets/avatar.png';
-
-// const initialSubscribers = [
-//   {
-//     id: 1,
-//     name: 'Jane Doe',
-//     image: '/avatar1.png',
-//     status: 'active',
-//     expiresOn: '2025-04-05',
-//     type: 'srs',
-//     subscriptionType: 'monthly-full-access'
-//   },
-//   {
-//     id: 2,
-//     name: 'Emmanuel Ogorchukwu N',
-//     image: '/avatar2.png',
-//     status: 'expiring',
-//     expiresOn: '2025-03-29',
-//     type: 'regular',
-//     subscriptionType: 'weekly-day-only'
-//   },
-//   {
-//     id: 3,
-//     name: 'Chidinma Ugochukwu',
-//     image: '/avatar3.png',
-//     status: 'expired',
-//     expiresOn: '2025-03-20',
-//     type: 'srs',
-//     subscriptionType: 'bi-weekly-full-access'
-//   },
-//   {
-//     id: 4,
-//     name: 'Tony Richards',
-//     image: '/avatar4.png',
-//     status: 'active',
-//     expiresOn: '2025-05-05',
-//     type: 'regular',
-//     subscriptionType: 'monthly-day-only'
-//   },
-//   {
-//     id: 5,
-//     name: 'Tony Richards',
-//     image: '/avatar4.png',
-//     status: 'active',
-//     expiresOn: '2025-05-05',
-//     type: 'regular',
-//     subscriptionType: 'daily'
-//   },
-//   {
-//     id: 6,
-//     name: 'Tony Richards',
-//     image: '/avatar4.png',
-//     status: 'active',
-//     expiresOn: '2025-05-05',
-//     type: 'regular',
-//     subscriptionType: 'half-day-morning'
-//   },
-// ];
+import avatar from '../assets/avatar.png';
 
 
 const statusColors = {
@@ -98,13 +41,13 @@ export default function Subscribers() {
 
   const filteredSubscribers = subscribers.filter((sub) => {
     if (!sub) return false;
-    
+
     const subscriberName = sub.subscriberDetails?.fullName || sub.subscriberDetails?.name || '';
     const matchName = subscriberName.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filter === 'all' || sub.subscriberDetails?.status === filter;
-    const matchSubscription = 
-      subscriptionFilter === 'all' || 
-      subscriptionFilter === '' || 
+    const matchSubscription =
+      subscriptionFilter === 'all' ||
+      subscriptionFilter === '' ||
       (sub.subscriberDetails?.subscriptionType?.toLowerCase() === subscriptionFilter.toLowerCase());
 
     return matchName && matchStatus && matchSubscription;
@@ -124,33 +67,13 @@ export default function Subscribers() {
     }
   };
 
-  // Update handleSaveEdit to include image handling
-  // const handleSaveEdit = () => {
-  //   setSubscribers((prev) =>
-  //     prev.map((sub) =>
-  //       sub.id === editModal.id
-  //         ? {
-  //           ...sub,
-  //           name: editModal.name,
-  //           subscriptionType: editModal.subscriptionType,
-  //           paymentMode: editModal.paymentMode,
-  //           image: imagePreview || sub.image, // Use new image if uploaded
-  //         }
-  //         : sub
-  //     )
-  //   );
-  //   setEditModal(null);
-  //   setImagePreview(null);
-  //   setToastMessage('Subscriber updated successfully!');
-  //   setTimeout(() => setToastMessage(''), 3000);
-  // };
 
   // Update handleSaveEdit function
   const handleSaveEdit = async () => {
     try {
       setLoading(true);
       const formData = new FormData();
-      formData.append('name', editModal.name);
+      formData.append('fullName', editModal.name);
       formData.append('subscriptionType', editModal.subscriptionType);
       formData.append('paymentMode', editModal.paymentMode);
 
@@ -195,13 +118,6 @@ export default function Subscribers() {
       }
     };
   }, []);
-
-  // const handleConfirmDelete = () => {
-  //   setSubscribers((prev) => prev.filter((sub) => sub.id !== deleteModal.id));
-  //   setDeleteModal(null);
-  //   setToastMessage('Subscriber deleted.');
-  //   setTimeout(() => setToastMessage(''), 3000);
-  // };
 
   const handleConfirmDelete = async () => {
     try {
@@ -427,7 +343,6 @@ export default function Subscribers() {
               <p className="text-xs text-gray-300">Expires on: {sub.subscriberDetails?.expiresOn || 'N/A'}</p>
             </div>
 
-            {/* Rest of the card code... */}
             {/* Detailed Info Overlay */}
             {hoveredCard === sub.id && (
               <div className="absolute inset-0 bg-gray-900/90 backdrop-blur-xl sm:hidden rounded-xl p-4 transform transition-all duration-300 ease-in-out z-10">
@@ -483,13 +398,23 @@ export default function Subscribers() {
             {/* Hover Actions */}
             <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
               <button
-                onClick={() => setEditModal({ ...sub })}
+                onClick={() => setEditModal({
+                  id: sub._id,
+                  name: sub.subscriberDetails?.fullName || sub.subscriberDetails?.name,
+                  status: sub.subscriberDetails?.status,
+                  subscriptionType: sub.subscriberDetails?.subscriptionType,
+                  paymentMode: sub.subscriberDetails?.paymentMode,
+                  image: sub.subscriberDetails?.image
+                })}
                 className="bg-white/20 hover:bg-white/30 text-white p-1 rounded-full"
               >
                 <Edit size={16} />
               </button>
               <button
-                onClick={() => setDeleteModal(sub)}
+                onClick={() => setDeleteModal({
+                  id: sub._id,
+                  name: sub.subscriberDetails?.fullName || sub.subscriberDetails?.name
+                })}
                 className="bg-white/20 hover:bg-red-600 text-white p-1 rounded-full"
               >
                 <Trash2 size={16} />
@@ -627,4 +552,5 @@ export default function Subscribers() {
       {/* Toast Notification */}
       {toastMessage && <Toast message={toastMessage} />}
     </div>
-  );}
+  );
+}
