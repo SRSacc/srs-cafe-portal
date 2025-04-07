@@ -42,5 +42,5 @@ For technical support or access issues:
 ---
 
 **CONFIDENTIAL AND PROPRIETARY**
-Copyright © [Company Name]. All Rights Reserved.
+Copyright © SRS. All Rights Reserved.
 Internal use only. use only.
