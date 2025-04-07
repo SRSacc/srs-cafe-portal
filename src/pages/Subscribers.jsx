@@ -2,6 +2,7 @@ import { Users, UserCheck, Clock, AlertTriangle } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Edit, Trash2, X } from 'lucide-react';
 import { getSubscribers, updateSubscriber, deleteSubscriber } from '../api/subscriber';
+import  avatar from '../assets/avatar.png';
 
 // const initialSubscribers = [
 //   {
@@ -401,12 +402,12 @@ export default function Subscribers() {
           >
             {/* Worker Type Badge */}
             <span className="absolute top-2 left-2 bg-white/20 text-white text-xs px-2 py-1 rounded-full font-medium shadow-md">
-              {sub.subscriberDetails?.workerType === 'srs' ? 'SRS' : 'REG'}
+              {sub.subscriberDetails?.subscriberType === 'SRS Worker' ? 'SRS' : 'REG'}
             </span>
 
             <div className="flex flex-col justify-start items-center flex-grow">
               <img
-                src={sub.subscriberDetails?.image || '/default-avatar.png'}
+                src={sub.subscriberDetails?.image || avatar}
                 alt={sub.subscriberDetails?.name}
                 className="w-28 h-28 rounded-full object-cover border-4 border-white/20"
               />
