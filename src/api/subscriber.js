@@ -33,13 +33,15 @@ export async function registerSubscriber(formData) {
 
 // Update subscriber
 export async function updateSubscriber(id, data) {
+  const isImageUpdate = id.includes('/image');
+  
   const response = await fetch(`${API_URL}/users/subscribers/${id}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      'Content-Type': 'application/json',
+      ...(!isImageUpdate && { 'Content-Type': 'application/json' })
     },
-    body: JSON.stringify(data),
+    body: isImageUpdate ? data : JSON.stringify(data),
   });
   return handleResponse(response);
 }

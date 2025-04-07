@@ -72,16 +72,22 @@ export default function Subscribers() {
   const handleSaveEdit = async () => {
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append('fullName', editModal.name);
-      formData.append('subscriptionType', editModal.subscriptionType);
-      formData.append('paymentMode', editModal.paymentMode);
-
+      
+      // If only updating image, use the dedicated image endpoint
       if (editModal.newImage) {
+        const formData = new FormData();
         formData.append('image', editModal.newImage);
+        await updateSubscriber(`${editModal.id}/image`, formData);
+      } else {
+        // For other updates, use the main update endpoint
+        const updateData = {
+          fullName: editModal.name,
+          subscriptionType: editModal.subscriptionType,
+          paymentMode: editModal.paymentMode,
+          status: editModal.status
+        };
+        await updateSubscriber(editModal.id, updateData);
       }
-
-      await updateSubscriber(editModal.id, formData);
 
       // Refresh subscribers list
       const updatedSubscribers = await getSubscribers();
