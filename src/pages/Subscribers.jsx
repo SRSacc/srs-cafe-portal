@@ -37,6 +37,7 @@ export default function Subscribers() {
   const filterRef = useRef(null);
   const [hoveredCard, setHoveredCard] = useState(null);
   const hoverTimerRef = useRef(null);
+  const [detailModal, setDetailModal] = useState(null);
 
 
   const filteredSubscribers = subscribers.filter((sub) => {
@@ -72,7 +73,7 @@ export default function Subscribers() {
   const handleSaveEdit = async () => {
     try {
       setLoading(true);
-      
+
       // If only updating image, use the dedicated image endpoint
       if (editModal.newImage) {
         const formData = new FormData();
@@ -115,6 +116,19 @@ export default function Subscribers() {
       }
       setHoveredCard(null);
     }
+  };
+
+  const handleCardClick = (sub) => {
+    setDetailModal({
+      id: sub._id,
+      name: sub.subscriberDetails?.fullName || sub.subscriberDetails?.name,
+      status: sub.subscriberDetails?.status,
+      subscriptionType: sub.subscriberDetails?.subscriptionType,
+      paymentMode: sub.subscriberDetails?.paymentMode,
+      image: sub.subscriberDetails?.image,
+      subscriberType: sub.subscriberDetails?.subscriberType,
+      expiresOn: sub.subscriberDetails?.expiresOn
+    });
   };
 
   useEffect(() => {
@@ -318,7 +332,8 @@ export default function Subscribers() {
         {filteredSubscribers.map((sub) => (
           <div
             key={sub._id}
-            className="relative bg-white/10 backdrop-blur-md rounded-xl shadow-md p-5 flex flex-col justify-between text-center hover:shadow-lg transition group h-50"
+            className="relative bg-white/10 backdrop-blur-md rounded-xl shadow-md p-5 flex flex-col justify-between text-center hover:shadow-lg transition group h-50 cursor-pointer"
+            onClick={() => handleCardClick(sub)}
             onMouseEnter={() => handleCardHover(sub._id, true)}
             onMouseLeave={() => handleCardHover(sub._id, false)}
           >
@@ -412,11 +427,11 @@ export default function Subscribers() {
                   paymentMode: sub.subscriberDetails?.paymentMode,
                   image: sub.subscriberDetails?.image,
                   subscriberType: sub.subscriberDetails?.subscriberType  // Add this line
-                  })}
-                  className="bg-white/20 hover:bg-white/30 text-white p-1 rounded-full"
-                >
-                  <Edit size={16} />
-                </button>
+                })}
+                className="bg-white/20 hover:bg-white/30 text-white p-1 rounded-full"
+              >
+                <Edit size={16} />
+              </button>
               <button
                 onClick={() => setDeleteModal({
                   id: sub._id,
@@ -554,6 +569,86 @@ export default function Subscribers() {
               >
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {detailModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setDetailModal(null);
+          }
+        }}>
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl w-full max-w-lg overflow-hidden relative">
+            {/* Close button */}
+            <button
+              onClick={() => setDetailModal(null)}
+              className="absolute top-4 right-4 z-10 bg-black/20 hover:bg-black/40 p-2 rounded-full text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Image Section (50% height) */}
+            <div className="h-[300px] relative">
+              <img
+                src={detailModal.image || avatar}
+                alt={detailModal.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                <h2 className="text-2xl font-bold text-white">{detailModal.name}</h2>
+                <span className={`inline-block px-3 py-1 rounded-full text-sm ${statusColors[detailModal.status]}`}>
+                  {detailModal.status?.charAt(0).toUpperCase() + detailModal.status?.slice(1)}
+                </span>
+              </div>
+            </div>
+
+            {/* Details Section (50% height) */}
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-400 text-sm">Subscription Type</p>
+                  <p className="text-white">{detailModal.subscriptionType}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Subscriber Type</p>
+                  <p className="text-white">{detailModal.subscriberType}</p>
+                </div>
+                {detailModal.subscriberType === 'SRS Worker' && (
+                  <div>
+                    <p className="text-gray-400 text-sm">Payment Mode</p>
+                    <p className="text-white">{detailModal.paymentMode}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-gray-400 text-sm">Expires On</p>
+                  <p className="text-white">{detailModal.expiresOn || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setEditModal(detailModal);
+                    setDetailModal(null);
+                  }}
+                  className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => {
+                    setDeleteModal({ id: detailModal.id, name: detailModal.name });
+                    setDetailModal(null);
+                  }}
+                  className="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-4 py-2 rounded-lg"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
