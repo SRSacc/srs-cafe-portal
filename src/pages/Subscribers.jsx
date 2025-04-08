@@ -281,15 +281,15 @@ export default function Subscribers() {
                 className="w-full bg-white/10 border border-white/30 text-white p-2 rounded-lg focus:outline-none appearance-none"
               >
                 <option value="all" className="text-black">All Types</option>
-                <option value="half-day-morning" className="text-black">Half-day (morning)</option>
-                <option value="half-day-night" className="text-black">Half-day (night)</option>
+                <option value="half-day (morning)" className="text-black">Half-day (morning)</option>
+                <option value="half-day (night)" className="text-black">Half-day (night)</option>
                 <option value="daily" className="text-black">Full day</option>
-                <option value="weekly-day-only" className="text-black">Weekly (day-only)</option>
-                <option value="weekly-full-access" className="text-black">Weekly (full-access)</option>
-                <option value="bi-weekly-day-only" className="text-black">Bi-weekly (day-only)</option>
-                <option value="bi-weekly-full-access" className="text-black">Bi-weekly (full-access)</option>
-                <option value="monthly-day-only" className="text-black">Monthly (day-only)</option>
-                <option value="monthly-full-access" className="text-black">Monthly (full-access)</option>
+                <option value="weekly (day only)" className="text-black">Weekly (day-only)</option>
+                <option value="weekly (full-access)" className="text-black">Weekly (full-access)</option>
+                <option value="bi-weekly (day-only)" className="text-black">Bi-weekly (day-only)</option>
+                <option value="bi-weekly (full-access)" className="text-black">Bi-weekly (full-access)</option>
+                <option value="monthly (day-only)" className="text-black">Monthly (day-only)</option>
+                <option value="monthly (full-access)" className="text-black">Monthly (full-access)</option>
               </select>
             </div>
           )}
@@ -410,12 +410,13 @@ export default function Subscribers() {
                   status: sub.subscriberDetails?.status,
                   subscriptionType: sub.subscriberDetails?.subscriptionType,
                   paymentMode: sub.subscriberDetails?.paymentMode,
-                  image: sub.subscriberDetails?.image
-                })}
-                className="bg-white/20 hover:bg-white/30 text-white p-1 rounded-full"
-              >
-                <Edit size={16} />
-              </button>
+                  image: sub.subscriberDetails?.image,
+                  subscriberType: sub.subscriberDetails?.subscriberType  // Add this line
+                  })}
+                  className="bg-white/20 hover:bg-white/30 text-white p-1 rounded-full"
+                >
+                  <Edit size={16} />
+                </button>
               <button
                 onClick={() => setDeleteModal({
                   id: sub._id,
@@ -471,30 +472,33 @@ export default function Subscribers() {
                   onChange={(e) => setEditModal({ ...editModal, subscriptionType: e.target.value })}
                   className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none"
                 >
-                  <option className="text-black" value="half-day-morning">Half-day (Morning)</option>
-                  <option className="text-black" value="half-day-night">Half-day (Night)</option>
-                  <option className="text-black" value="daily">Daily</option>
-                  <option className="text-black" value="weekly-day-only">Weekly (Day Only)</option>
-                  <option className="text-black" value="weekly-full-access">Weekly (Full Access)</option>
-                  <option className="text-black" value="bi-weekly-day-only">Bi-weekly (Day Only)</option>
-                  <option className="text-black" value="bi-weekly-full-access">Bi-weekly (Full Access)</option>
-                  <option className="text-black" value="monthly-day-only">Monthly (Day Only)</option>
-                  <option className="text-black" value="monthly-full-access">Monthly (Full Access)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="half-day-morning">Half-day (Morning)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="half-day-night">Half-day (Night)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="daily">Daily</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="weekly-day-only">Weekly (Day Only)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="weekly-full-access">Weekly (Full Access)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="bi-weekly-day-only">Bi-weekly (Day Only)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="bi-weekly-full-access">Bi-weekly (Full Access)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="monthly-day-only">Monthly (Day Only)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="monthly-full-access">Monthly (Full Access)</option>
                 </select>
               </div>
 
               {/* Payment Mode */}
-              <div>
-                <label className="block mb-1 text-sm font-medium">Payment Mode</label>
-                <select
-                  value={editModal.paymentMode || ''}
-                  onChange={(e) => setEditModal({ ...editModal, paymentMode: e.target.value })}
-                  className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none"
-                >
-                  <option className="text-black" value="self">Self</option>
-                  <option className="text-black" value="company">Company</option>
-                </select>
-              </div>
+              {/* Only show payment mode for SRS Worker */}
+              {editModal.subscriberType === 'SRS Worker' && (
+                <div className='mb-4'>
+                  <label className="block mb-1 text-sm font-medium">Payment Mode</label>
+                  <select
+                    value={editModal.paymentMode || ''}
+                    onChange={(e) => setEditModal({ ...editModal, paymentMode: e.target.value })}
+                    className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none"
+                  >
+                    <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="self">Self</option>
+                    <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="company">Company</option>
+                  </select>
+                </div>
+              )}
 
               {/* Save Button */}
               {/* Image Upload */}
