@@ -124,7 +124,7 @@ export default function Subscribers() {
       name: sub.subscriberDetails?.fullName || sub.subscriberDetails?.name,
       status: sub.subscriberDetails?.status,
       subscriptionType: sub.subscriberDetails?.subscriptionType,
-      paymentMode: sub.subscriberDetails?.paymentMode,
+      paymentMode: sub.subscriberDetails?.paymentMode || 'Not Specified',
       image: sub.subscriberDetails?.image,
       subscriberType: sub.subscriberDetails?.subscriberType,
       expiresOn: sub.subscriberDetails?.expiresOn
@@ -509,8 +509,8 @@ export default function Subscribers() {
                     onChange={(e) => setEditModal({ ...editModal, paymentMode: e.target.value })}
                     className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none"
                   >
-                    <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="self">Self</option>
-                    <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="company">Company</option>
+                    <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Self">Self</option>
+                    <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Company">Company</option>
                   </select>
                 </div>
               )}

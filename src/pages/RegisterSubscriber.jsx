@@ -12,7 +12,7 @@ const Toast = ({ message, type = 'success' }) => (
 export default function RegisterSubscriber() {
   const [activeTab, setActiveTab] = useState('regular');
   const [regularData, setRegularData] = useState({ name: '', phoneNumber: '', referral: '', type: 'Half-day (morning)' });
-  const [srsData, setSrsData] = useState({ name: '', phoneNumber: '', referral: '', type: 'Half-day (morning)', paymentMode: 'self' });
+  const [srsData, setSrsData] = useState({ name: '', phoneNumber: '', referral: '', type: 'Half-day (morning)', paymentMode: 'Self' });
   const [startDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -81,7 +81,7 @@ export default function RegisterSubscriber() {
       if (activeTab === 'regular') {
         setRegularData({ name: '', phone: '', referral: '', type: 'daily' });
       } else {
-        setSrsData({ name: '', phone: '', referral: '', type: 'daily', paymentMode: 'self' });
+        setSrsData({ name: '', phone: '', referral: '', type: 'daily', paymentMode: 'Self' });
       }
       setImage(null);
     } catch (error) {
@@ -187,8 +187,8 @@ export default function RegisterSubscriber() {
               onChange={handleSrsChange}
               className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30"
             >
-              <option className="text-black" value="self">Self</option>
-              <option className="text-black" value="company">Company</option>
+              <option className="text-black" value="Self">Self</option>
+              <option className="text-black" value="Company">Company</option>
             </select>
           </div>
         )}
