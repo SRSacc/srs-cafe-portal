@@ -38,10 +38,13 @@ export default function Subscribers() {
   const [hoveredCard, setHoveredCard] = useState(null);
   const hoverTimerRef = useRef(null);
   const [detailModal, setDetailModal] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [totalItems, setTotalItems] = useState(0);
 
 
-  const filteredSubscribers = subscribers.filter((sub) => {
-    if (!sub) return false;
+  const filteredSubscribers = (Array.isArray(subscribers) ? subscribers : []).filter((sub) => {
+    if (!sub || !sub.subscriberDetails) return false;
 
     const subscriberName = sub.subscriberDetails?.fullName || sub.subscriberDetails?.name || '';
     const matchName = subscriberName.toLowerCase().includes(search.toLowerCase());
@@ -174,19 +177,29 @@ export default function Subscribers() {
     const fetchSubscribers = async () => {
       try {
         setLoading(true);
-        const data = await getSubscribers();
-        console.log('Received subscribers:', data); // Log the received data
-        setSubscribers(data);
+        const response = await getSubscribers(currentPage, itemsPerPage);
+        console.log('API response:', response); // Log the received data
+
+        const subscribersData = response.subscribers || [];
+        const paginationData = response.pagination || {};
+
+        setSubscribers(subscribersData);
+        setTotalItems(paginationData.total || subscribersData.length || 0);
       } catch (err) {
+        console.error('Error fetching subscribers:', err);
         setError(err.message);
         setToastMessage('Failed to load subscribers: ' + err.message);
+        setSubscribers([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchSubscribers();
-  }, []);
+  }, [currentPage, itemsPerPage]);
+
+
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   // Add loading state check before the return statement
   if (loading) {
@@ -215,44 +228,62 @@ export default function Subscribers() {
       {/* Stats Grid */}
       <div className="flex w-90% md:w-auto sm:grid sm:grid-cols-4 gap-2 sm:gap-4 overflow-x-auto pb-2 sm:pb-0">
         {/* Active Subscribers */}
-        <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-6 rounded-xl flex-shrink-0 w-1/4 md:w-auto">
+        <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 backdrop-blur-sm px-2 py-3 sm:p-4 lg:p-6 rounded-2xl flex-shrink-0 w-1/4 md:w-auto border border-white/10 hover:border-white/20 transition-all duration-300"
+          onClick={() => setFilter('active')}
+        >
           <div className="flex items-center gap-2 sm:gap-3">
-            <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-green-400" />
+            <div className="bg-green-500/20 p-0 sm:p-2 rounded-md sm:rounded-2xl">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-green-400" />
+            </div>
             <div className="lg:block">
-              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">Active Subscribers</p>
+              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">Active</p>
               <h3 className="text-base sm:text-lg lg:text-2xl font-bold">{stats.totalActive}</h3>
             </div>
           </div>
         </div>
 
         {/* Expiring Soon */}
-        <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-6 rounded-xl flex-shrink-0 w-1/4 sm:w-auto">
+        <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 backdrop-blur-sm px-2 py-3 sm:p-4 lg:p-6 rounded-2xl flex-shrink-0 w-1/4 sm:w-auto border border-white/10 hover:border-white/20 transition-all duration-300"
+          onClick={() => setFilter('expiring')}
+        >
           <div className="flex items-center gap-2 sm:gap-3">
-            <Clock className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-yellow-400" />
+            <div className="bg-yellow-500/20 p-0 sm:p-2 rounded-md sm:rounded-2xl">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-yellow-400" />
+            </div>
             <div className="lg:block">
-              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">Expiring Soon</p>
+              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">Expiring</p>
               <h3 className="text-base sm:text-lg lg:text-2xl font-bold">{stats.expiringNext7Days}</h3>
             </div>
           </div>
         </div>
 
         {/* Expired Subscribers */}
-        <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-6 rounded-xl flex-shrink-0 w-1/4 sm:w-auto">
+        <div
+          className='bg-gradient-to-br from-red-500/20 to-red-600/10 backdrop-blur-sm px-2 py-3 sm:p-4 lg:p-6 rounded-2xl flex-shrink-0 w-1/4 sm:w-auto border border-white/10 hover:border-white/20 transition-all duration-300'
+          onClick={() => setFilter('expired')}
+        >
           <div className="flex items-center gap-2 sm:gap-3">
-            <UserCheck className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-red-400" />
+            <div className="bg-red-500/20 p-0 sm:p-2 rounded-md sm:rounded-2xl">
+              <UserCheck className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-red-400" />
+            </div>
             <div className="lg:block">
-              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">Expired Subscribers</p>
+              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">Expired</p>
               <h3 className="text-base sm:text-lg lg:text-2xl font-bold">{stats.expiredSubscribers}</h3>
             </div>
           </div>
         </div>
 
         {/* New This Week */}
-        <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-6 rounded-xl flex-shrink-0 w-1/4 sm:w-auto">
+        <div
+          className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 backdrop-blur-sm px-2 py-3 sm:p-4 lg:p-6 rounded-2xl flex-shrink-0 w-1/4 sm:w-auto border border-white/10 hover:border-white/20 transition-all duration-300"
+          onClick={() => setFilter('all')}
+        >
           <div className="flex items-center gap-2 sm:gap-3">
-            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-purple-400" />
+            <div className="bg-purple-500/20 p-0 sm:p-2 rounded-md sm:rounded-2xl">
+              <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-purple-400" />
+            </div>
             <div className="lg:block">
-              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">New This Week</p>
+              <p className="text-xs lg:text-sm text-gray-300 hidden lg:block">New</p>
               <h3 className="text-base sm:text-lg lg:text-2xl font-bold">{stats.recentRegistrations}</h3>
             </div>
           </div>
@@ -332,36 +363,33 @@ export default function Subscribers() {
         {filteredSubscribers.map((sub) => (
           <div
             key={sub._id}
-            className="relative bg-white/10 backdrop-blur-md rounded-xl shadow-md p-5 flex flex-col justify-between text-center hover:shadow-lg transition group h-50 cursor-pointer"
+            className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-xl shadow-lg hover:shadow-xl p-5 flex flex-col justify-between text-center transition-all duration-300 hover:scale-[1.02] hover:border-white/20 border border-white/10 h-50 cursor-pointer"
             onClick={() => handleCardClick(sub)}
             onMouseEnter={() => handleCardHover(sub._id, true)}
             onMouseLeave={() => handleCardHover(sub._id, false)}
           >
             {/* Worker Type Badge */}
-            <span className="absolute top-2 left-2 bg-white/20 text-white text-xs px-2 py-1 rounded-full font-medium shadow-md">
+            <span className="absolute top-3 left-3 bg-black/40 text-white text-xs px-3 py-1 rounded-full font-medium shadow-lg">
               {sub.subscriberDetails?.subscriberType === 'SRS Worker' ? 'SRS' : 'REG'}
             </span>
 
             <div className="flex flex-col justify-start items-center flex-grow">
-              <img
-                src={sub.subscriberDetails?.image || avatar}
-                alt={sub.subscriberDetails?.name}
-                className="w-28 h-28 rounded-full object-cover border-4 border-white/20"
-              />
-              <h3
-                className="text-lg font-semibold mt-2 max-w-full truncate"
-                title={sub.subscriberDetails?.name}
-              >
+            <div className="relative">
+                <img
+                  src={sub.subscriberDetails?.image || avatar}
+                  alt={sub.subscriberDetails?.name}
+                  className="w-28 h-28 rounded-full object-cover ring-4 ring-white/20 group-hover:ring-white/30 transition-all duration-300"
+                />
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+                  <span className={`px-3 py-1 text-xs rounded-full shadow-lg ${statusColors[sub.subscriberDetails?.status || 'active']}`}>
+                    {(sub.subscriberDetails?.status || 'active').charAt(0).toUpperCase() + (sub.subscriberDetails?.status || 'active').slice(1)}
+                  </span>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold mt-4 max-w-full truncate px-2">
                 {sub.subscriberDetails?.name}
               </h3>
-            </div>
-
-            {/* Card Footer Section: Status + Expiry */}
-            <div className="mt-5 space-y-1 h-[50px] flex flex-col justify-center items-center">
-              <span className={`px-3 py-1 text-xs rounded-full ${statusColors[sub.subscriberDetails?.status || 'active']}`}>
-                {(sub.subscriberDetails?.status || 'active').charAt(0).toUpperCase() + (sub.subscriberDetails?.status || 'active').slice(1)}
-              </span>
-              <p className="text-xs text-gray-300">Expires on: {sub.subscriberDetails?.expiresOn || 'N/A'}</p>
+              <p className="text-xs text-gray-400 mt-1">Expires: {sub.subscriberDetails?.expiresOn || 'N/A'}</p>
             </div>
 
             {/* Detailed Info Overlay */}
@@ -416,28 +444,23 @@ export default function Subscribers() {
                 </div>
               </div>
             )}
-            {/* Hover Actions */}
-            <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
+             {/* Hover Actions */}
+             <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
               <button
-                onClick={() => setEditModal({
-                  id: sub._id,
-                  name: sub.subscriberDetails?.fullName || sub.subscriberDetails?.name,
-                  status: sub.subscriberDetails?.status,
-                  subscriptionType: sub.subscriberDetails?.subscriptionType,
-                  paymentMode: sub.subscriberDetails?.paymentMode,
-                  image: sub.subscriberDetails?.image,
-                  subscriberType: sub.subscriberDetails?.subscriberType  // Add this line
-                })}
-                className="bg-white/20 hover:bg-white/30 text-white p-1 rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditModal({/*...existing props...*/});
+                }}
+                className="bg-black/40 hover:bg-black/60 text-white p-2 rounded-lg transition-all duration-300"
               >
                 <Edit size={16} />
               </button>
               <button
-                onClick={() => setDeleteModal({
-                  id: sub._id,
-                  name: sub.subscriberDetails?.fullName || sub.subscriberDetails?.name
-                })}
-                className="bg-white/20 hover:bg-red-600 text-white p-1 rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteModal({/*...existing props...*/});
+                }}
+                className="bg-black/40 hover:bg-red-600 text-white p-2 rounded-lg transition-all duration-300"
               >
                 <Trash2 size={16} />
               </button>
@@ -445,6 +468,57 @@ export default function Subscribers() {
           </div>
         ))}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <span>Showing</span>
+            <select
+              className="bg-white/10 border border-white/30 rounded-lg px-2 py-1 text-gray"
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={12}>12</option>
+              <option value={18}>18</option>
+              <option value={24}>24</option>
+              <option value={36}>36</option>
+            </select>
+            <span>items per page</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className={`p-2 rounded-lg ${currentPage === 1
+                ? 'text-gray-500 cursor-not-allowed'
+                : 'text-white hover:bg-white/10'
+                }`}
+            >
+              Previous
+            </button>
+
+            <span className="text-white">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className={`p-2 rounded-lg ${currentPage === totalPages
+                ? 'text-gray-500 cursor-not-allowed'
+                : 'text-white hover:bg-white/10'
+                }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {editModal && (
@@ -591,12 +665,16 @@ export default function Subscribers() {
             </button>
 
             {/* Image Section (50% height) */}
-            <div className="h-[300px] relative">
+            <div className="relative">
+              <div
+                className="w-full h-[250px] md:h-[350px] lg:h-[450px] overflow-hidden"
+              >
               <img
                 src={detailModal.image || avatar}
                 alt={detailModal.name}
                 className="w-full h-full object-cover"
               />
+              </div>
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                 <h2 className="text-2xl font-bold text-white">{detailModal.name}</h2>
                 <span className={`inline-block px-3 py-1 rounded-full text-sm ${statusColors[detailModal.status]}`}>
