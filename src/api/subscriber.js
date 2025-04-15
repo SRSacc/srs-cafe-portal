@@ -9,10 +9,9 @@ const handleResponse = async (response) => {
   return response.json();
 };
 
-
 // Get all subscribers
-export async function getSubscribers(page = 1, limit = 6) {
-  const response = await fetch(`${API_URL}/users/subscribers?page=${page}&limit=${limit}`, {
+export async function getSubscribers() {
+  const response = await fetch(`${API_URL}/users/subscribers`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
     },
