@@ -82,7 +82,7 @@ export default function Subscribers() {
       } else {
         // For other updates, use the main update endpoint
         const updateData = {
-          fullName: editModal.name,
+          name: editModal.name,
           subscriptionType: editModal.subscriptionType,
           paymentMode: editModal.paymentMode,
           status: editModal.status
