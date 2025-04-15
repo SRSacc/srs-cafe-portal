@@ -487,15 +487,15 @@ export default function Subscribers() {
                   onChange={(e) => setEditModal({ ...editModal, subscriptionType: e.target.value })}
                   className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none"
                 >
-                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="half-day-morning">Half-day (Morning)</option>
-                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="half-day-night">Half-day (Night)</option>
-                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="daily">Daily</option>
-                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="weekly-day-only">Weekly (Day Only)</option>
-                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="weekly-full-access">Weekly (Full Access)</option>
-                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="bi-weekly-day-only">Bi-weekly (Day Only)</option>
-                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="bi-weekly-full-access">Bi-weekly (Full Access)</option>
-                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="monthly-day-only">Monthly (Day Only)</option>
-                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="monthly-full-access">Monthly (Full Access)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Half-day (morning)">Half-day (Morning)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Half-day (night)">Half-day (Night)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Full day">Full day</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Weekly (day-only)">Weekly (Day Only)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Weekly (full-access)">Weekly (Full Access)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Bi-weekly (day-only)">Bi-weekly (Day Only)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Bi-weekly (full-access)">Bi-weekly (Full Access)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Monthly (day-only)">Monthly (Day Only)</option>
+                  <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Monthly (full-access)">Monthly (Full Access)</option>
                 </select>
               </div>
 
