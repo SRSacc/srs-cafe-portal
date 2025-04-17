@@ -91,37 +91,64 @@ export const validateSubscriptionTiming = (subscriptionType, currentTime = dayjs
 // Calculate subscription status
 export const getSubscriptionStatus = (startDateTime, endDateTime, expirationDate) => {
     const now = dayjs();
-    const start = dayjs(startDateTime);
-    const end = dayjs(endDateTime);
-    const expiry = dayjs(expirationDate);
-    const minutesBeforeExpiry = TIME_CONFIG.NOTIFICATION_BEFORE;
-    const minutesUntilExpiry = expiry.diff(now, 'minute');
 
-    // Invalid dates
-    if (!startDateTime || !endDateTime || !expirationDate) {
-        return {
-            status: 'invalid',
-            message: 'Invalid subscription dates'
-        };
-    }  
+    // Debug incoming data
+    console.log('Incoming dates:', {
+        startDateTime,
+        endDateTime,
+        expirationDate,
+        type: {
+            start: typeof startDateTime,
+            end: typeof endDateTime,
+            expiry: typeof expirationDate
+        }
+    });
 
-    // Not started yet
-    if (now.isBefore(start)) {
-        return {
-            status: 'pending',
-            message: `Subscription starts on ${start.format('MMM DD, YYYY [at] hh:mm A')}`
-        };
-    }
+    try {
+        // More lenient date validation
+        if (!startDateTime || !endDateTime || !expirationDate) {
+            return {
+                status: 'invalid',
+                message: 'Missing subscription dates'
+            };
+        }
 
-    // Expired
-    if (now.isAfter(expiry)) {
-        return {
-            status: 'expired',
-            message: `Subscription expired on ${expiry.format('MMM DD, YYYY [at] hh:mm A')}`
-        };
-    }
+        const start = dayjs(startDateTime);
+        const end = dayjs(endDateTime);
+        const expiry = dayjs(expirationDate);
 
-        // Expiring very soon (within 15 minutes)
+        // Check if dates are valid
+        if (!start?.isValid() || !end?.isValid() || !expiry?.isValid()) {
+
+            console.log('Invalid dates after parsing:', {
+                start: start.format(),
+                end: end.format(),
+                expiry: expiry.format()
+            });
+            return {
+                status: 'invalid',
+                message: 'Invalid subscription dates'
+            };
+        }
+
+        const minutesBeforeExpiry = TIME_CONFIG.NOTIFICATION_BEFORE;
+        const minutesUntilExpiry = expiry.diff(now, 'minute');
+
+        // Not started yet
+        if (now.isBefore(start)) {
+            return {
+                status: 'pending',
+                message: `Subscription starts on ${start.format('MMM DD, YYYY [at] hh:mm A')}`
+            };
+        }
+
+        if (now.isAfter(expiry)) {
+            return {
+                status: 'expired',
+                message: `Subscription expired on ${expiry.format('MMM DD, YYYY [at] hh:mm A')}`
+            };
+        }
+
         if (minutesUntilExpiry <= 15) {
             return {
                 status: 'expiring',
@@ -130,26 +157,22 @@ export const getSubscriptionStatus = (startDateTime, endDateTime, expirationDate
             };
         }
 
-    // Expiring soon (within notification window)
-    if (minutesUntilExpiry <= minutesBeforeExpiry) {
+        if (minutesUntilExpiry <= minutesBeforeExpiry) {
+            return {
+                status: 'expiring',
+                message: `Subscription expires in ${Math.floor(minutesUntilExpiry / 60)} hours ${minutesUntilExpiry % 60} minutes`
+            };
+        }
+
         return {
-            status: 'expiring',
-            message: `Subscription expires in ${Math.floor(minutesUntilExpiry / 60)} hours ${minutesUntilExpiry % 60} minutes`
+            status: 'active',
+            message: 'Subscription is active',
+            endTime: end.format('MMM DD, YYYY [at] hh:mm A')
+        };
+    } catch (error) {
+        return {
+            status: 'invalid',
+            message: 'Error processing subscription dates'
         };
     }
-    // if (expiry.diff(now, 'minute') <= minutesBeforeExpiry) {
-    //     return {
-    //         status: 'expiring',
-    //         message: `Subscription expires in ${expiry.diff(now, 'minute')} minutes`
-    //     };
-    // }
-
-
-
-    // Active
-    return {
-        status: 'active',
-        message: 'Subscription is active',
-        endTime: end.format('MMM DD, YYYY [at] hh:mm A')
-    };
-} 
+};
