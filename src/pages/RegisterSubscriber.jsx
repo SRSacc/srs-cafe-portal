@@ -2,6 +2,7 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import { User, Building2, Loader2 } from 'lucide-react';
 import { registerSubscriber } from '../api/subscriber';
+import { SUBSCRIPTION_TYPES, calculateEndTime, calculateExpirationDate, validateSubscriptionTiming } from '../utils/subscriptionUtils';
 
 const Toast = ({ message, type = 'success' }) => (
   <div className={`fixed bottom-4 right-4 z-50 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-lg shadow-lg border ${type === 'error' ? 'border-red-400' : 'border-white/30'} animate-fade-in-up`}>
@@ -11,8 +12,8 @@ const Toast = ({ message, type = 'success' }) => (
 
 export default function RegisterSubscriber() {
   const [activeTab, setActiveTab] = useState('regular');
-  const [regularData, setRegularData] = useState({ name: '', phoneNumber: '', referral: '', type: 'Half-day (morning)' });
-  const [srsData, setSrsData] = useState({ name: '', phoneNumber: '', referral: '', type: 'Half-day (morning)', paymentMode: 'Self' });
+  const [regularData, setRegularData] = useState({ name: '', phoneNumber: '', referral: '', type: SUBSCRIPTION_TYPES.HALF_DAY_MORNING });
+  const [srsData, setSrsData] = useState({ name: '', phoneNumber: '', referral: '', type: SUBSCRIPTION_TYPES.HALF_DAY_MORNING, paymentMode: 'Self' });
   const [startDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -39,6 +40,17 @@ export default function RegisterSubscriber() {
 
     // Validate form
     const data = activeTab === 'regular' ? regularData : srsData;
+    const currentDateTime = dayjs();
+
+    // Validate subscription timing
+    const timeValidation = validateSubscriptionTiming(data.type, currentDateTime);
+    if (!timeValidation.isValid) {
+      setToast({ message: timeValidation.message, type: 'error' });
+      setTimeout(() => setToast({ message: '', type:'success' }), 3000);
+      return;
+    }
+
+    // Validate form
     if (!data.name.trim()) {
       setToast({ message: 'Please enter a name', type: 'error' });
       setTimeout(() => setToast({ message: '', type: 'success' }), 3000);
@@ -61,7 +73,10 @@ export default function RegisterSubscriber() {
     formData.append('referral', data.referral);
     formData.append('subscriptionType', data.type);
     formData.append('subscriberType', activeTab === 'regular' ? 'Regular Subscriber' : 'SRS Worker');
-    formData.append('startDate', startDate);
+    formData.append('startDateTime', currentDateTime.format('YYYY-MM-DD HH:mm:ss')); // Format current date and time
+    formData.append('endDateTime', calculateEndTime(currentDateTime, data.type));
+    formData.append('expirationDate',calculateExpirationDate(currentDateTime, data.type).format('YYYY-MM-DD HH:mm:ss'));  // Format expiration date and time
+    // formData.append('startDate', startDate);
     formData.append('workerType', activeTab);
 
     if (activeTab === 'srs') {
@@ -79,9 +94,9 @@ export default function RegisterSubscriber() {
       setToast({ message: 'Subscriber registered successfully!', type: 'success' });
       // Reset form
       if (activeTab === 'regular') {
-        setRegularData({ name: '', phone: '', referral: '', type: 'daily' });
+        setRegularData({ name: '', phoneNumber: '', referral: '', type: SUBSCRIPTION_TYPES.HALF_DAY_MORNING });
       } else {
-        setSrsData({ name: '', phone: '', referral: '', type: 'daily', paymentMode: 'Self' });
+        setSrsData({ name: '', phoneNumber: '', referral: '', type: SUBSCRIPTION_TYPES.HALF_DAY_MORNING, paymentMode: 'Self' });
       }
       setImage(null);
     } catch (error) {

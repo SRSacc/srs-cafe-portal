@@ -1,4 +1,6 @@
+import { SubscriptionStatus } from '../components/SubscriptionStatus';
 import { Users, UserCheck, Clock, AlertTriangle } from 'lucide-react';
+import dayjs from 'dayjs';
 import { useState, useRef, useEffect } from 'react';
 import { Edit, Trash2, X } from 'lucide-react';
 import { getSubscribers, updateSubscriber, deleteSubscriber } from '../api/subscriber';
@@ -127,7 +129,10 @@ export default function Subscribers() {
       paymentMode: sub.subscriberDetails?.paymentMode || 'Not Specified',
       image: sub.subscriberDetails?.image,
       subscriberType: sub.subscriberDetails?.subscriberType,
-      expiresOn: sub.subscriberDetails?.expiresOn
+      expiresOn: sub.subscriberDetails?.expiresOn,
+      startDateTime: sub.subscriberDetails?.startDateTime,
+      endDateTime: sub.subscriberDetails?.endDateTime,
+      expirationDate: sub.subscriberDetails?.expirationDate
     });
   };
 
@@ -357,11 +362,32 @@ export default function Subscribers() {
             </div>
 
             {/* Card Footer Section: Status + Expiry */}
-            <div className="mt-5 space-y-1 h-[50px] flex flex-col justify-center items-center">
-              <span className={`px-3 py-1 text-xs rounded-full ${statusColors[sub.subscriberDetails?.status || 'active']}`}>
-                {(sub.subscriberDetails?.status || 'active').charAt(0).toUpperCase() + (sub.subscriberDetails?.status || 'active').slice(1)}
-              </span>
-              <p className="text-xs text-gray-300">Expires on: {sub.subscriberDetails?.expiresOn || 'N/A'}</p>
+            <div className="mt-4 space-y-2">
+              {/* Status Badge */}
+              <div className="flex justify-center">
+                <span className={`px-4 py-1.5 text-xs font-medium rounded-full shadow-lg ${statusColors[sub.subscriberDetails?.status || 'active']}`}>
+                  {(sub.subscriberDetails?.status || 'active').charAt(0).toUpperCase() + (sub.subscriberDetails?.status || 'active').slice(1)}
+                </span>
+              </div>
+
+              {/* Subscription Status with Timer */}
+              <div className="bg-black/20 rounded-lg p-2">
+                <SubscriptionStatus 
+                  startDateTime={sub.subscriberDetails?.startDateTime}
+                  endDateTime={sub.subscriberDetails?.endDateTime}
+                  expirationDate={sub.subscriberDetails?.expirationDate}
+                />
+              </div>
+
+              {/* Expiry Date */}
+              <div className="text-xs text-gray-400 flex items-center justify-center gap-2 bg-black/20 rounded-full px-3 py-1.5">
+                <Clock size={14} className="text-gray-300" />
+                <p className="text-gray-300">
+                  {sub.subscriberDetails?.expiresOn 
+                    ? `Expires: ${dayjs(sub.subscriberDetails.expiresOn).format('MMM DD, YYYY [at] hh:mm A')}`
+                    : 'Expiration date not set'}
+                </p>
+              </div>
             </div>
 
             {/* Detailed Info Overlay */}
@@ -608,6 +634,13 @@ export default function Subscribers() {
             {/* Details Section (50% height) */}
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <SubscriptionStatus 
+                    startDateTime={detailModal.startDateTime}
+                    endDateTime={detailModal.endDateTime}
+                    expirationDate={detailModal.expirationDate}
+                  />
+                </div>
                 <div>
                   <p className="text-gray-400 text-sm">Subscription Type</p>
                   <p className="text-white">{detailModal.subscriptionType}</p>
