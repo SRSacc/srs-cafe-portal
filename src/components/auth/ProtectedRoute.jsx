@@ -6,7 +6,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
   const location = useLocation();
 
   if (loading) {
-    return null; // or a loading spinner component
+    return (null); // or a loading spinner component
   }
 
   if (!user) {

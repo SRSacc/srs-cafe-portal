@@ -234,7 +234,7 @@ export default function Subscribers() {
       <div className="flex w-90% md:w-auto sm:grid sm:grid-cols-4 gap-2 sm:gap-4 overflow-x-auto pb-2 sm:pb-0">
         {/* Active Subscribers */}
         {/* <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-6 rounded-xl flex-shrink-0 w-1/4 md:w-auto"> */}
-        <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 backdrop-blur-sm px-2 py-3 sm:p-4 lg:p-6 rounded-2xl flex-shrink-0 w-1/4 md:w-auto border border-white/10 hover:border-white/20 transition-all duration-300"
+        <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 backdrop-blur-sm px-2 py-3 sm:p-4 lg:p-6 rounded-2xl flex-shrink-0 w-1/4 sm:w-auto border border-white/10 hover:border-white/20 transition-all duration-300"
           onClick={() => setFilter('active')}
         >
           <div className="flex items-center gap-2 sm:gap-3">
@@ -394,7 +394,7 @@ export default function Subscribers() {
               >
                 {sub.subscriberDetails?.name}
               </h3>
-              <p className="text-xs text-gray-400 mt-1">Expires: {sub.subscriberDetails?.expiresOn || 'N/A'}</p>
+              {/* <p className="text-xs text-gray-400 mt-1">Expires: {sub.subscriberDetails?.expiresOn || 'N/A'}</p> */}
             </div>
 
             {/* Card Footer Section: Status + Expiry */}
@@ -714,7 +714,7 @@ export default function Subscribers() {
 
             {/* Image Section (50% height) */}
             <div className="h-[300px] relative">
-              <div className="w-full h-[250px] md:h-[350px] lg:h-[450px] overflow-hidden">
+              <div className="w-full h-full overflow-hidden">
               <img
                 src={detailModal.image || avatar}
                 alt={detailModal.name}

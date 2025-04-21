@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { fetchUserData } from '../api/auth';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const AuthContext = createContext(null);
 
@@ -37,7 +38,9 @@ export function AuthProvider({ children }) {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+        <LoadingSpinner className="w-5 h-5 animate-spin" />
+      )
   }
 
   return (
