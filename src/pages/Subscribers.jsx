@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Edit, Trash2, X } from 'lucide-react';
 import { getSubscribers, updateSubscriber, deleteSubscriber } from '../api/subscriber';
 import avatar from '../assets/avatar.png';
+import { compressImage } from '../utils/imageCompression';
 
 
 const statusColors = {

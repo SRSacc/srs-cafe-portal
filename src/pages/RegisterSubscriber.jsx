@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { User, Building2, Loader2 } from 'lucide-react';
 import { registerSubscriber } from '../api/subscriber';
 import { SUBSCRIPTION_TYPES, calculateEndTime, calculateExpirationDate, validateSubscriptionTiming } from '../utils/subscriptionUtils';
-
+import {compressImage} from '../utils/imageCompression';
 const Toast = ({ message, type = 'success' }) => (
   <div className={`fixed bottom-4 right-4 z-50 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-lg shadow-lg border ${type === 'error' ? 'border-red-400' : 'border-white/30'} animate-fade-in-up`}>
     {message}
@@ -16,6 +16,7 @@ export default function RegisterSubscriber() {
   const [srsData, setSrsData] = useState({ name: '', phoneNumber: '', referral: '', type: SUBSCRIPTION_TYPES.HALF_DAY_MORNING, paymentMode: 'Self' });
   const [startDate] = useState(dayjs().format('YYYY-MM-DD'));
   const [image, setImage] = useState(null);
+  const [compressedImage, setCompressedImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ message: '', type: 'success' });
 
@@ -27,10 +28,22 @@ export default function RegisterSubscriber() {
     setSrsData({ ...srsData, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file));
+      try {
+        // create preview
+        const previewUrl = URL.createObjectURL(file);
+        setImage(previewUrl);
+  
+        // compress image
+        const compressedFile = await compressImage(file);
+        setCompressedImage(compressedFile);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        setToast({ message: 'Error compressing image. Please try again.', type: 'error' });
+        setTimeout(() => setToast({ message: '', type:'success' }), 3000);}
+      // setImage(URL.createObjectURL(file));
     }
   };
 
@@ -83,7 +96,9 @@ export default function RegisterSubscriber() {
       formData.append('paymentMode', data.paymentMode);
     }
 
-    if (image) {
+    if (compressedImage) {
+      formData.append('image', compressedImage);
+    } else if (image) {
       const file = document.querySelector('input[type="file"]').files[0];
       formData.append('image', file);
     }
