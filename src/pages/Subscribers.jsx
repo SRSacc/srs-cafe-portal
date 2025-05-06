@@ -62,15 +62,23 @@ export default function Subscribers() {
 
 
   // Add this handler for image upload
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-        setEditModal({ ...editModal, newImage: file });
-      };
-      reader.readAsDataURL(file);
+      try {
+        // Compress the image before preview and upload
+        const compressedFile = await compressImage(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+          setEditModal({ ...editModal, newImage: compressedFile });
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        setToastMessage('Error compressing image. Please try again.');
+        setTimeout(() => setToastMessage(''), 3000);
+      }
     }
   };
 
