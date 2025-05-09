@@ -115,7 +115,7 @@ const processSubscription = (subscriptionData) => {
             "paymentMode": "Self",
             "startDateTime": "2024-01-20T14:30:00.000Z",
             "endDateTime": "2024-01-20T18:00:00.000Z",
-            "expirationDate": "2024-01-20T18:00:00.000Z",
+            "expirationDate": "2024-02-20T18:00:00.000Z",
             "status": "active"
         }
     }
