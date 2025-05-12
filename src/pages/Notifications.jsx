@@ -30,7 +30,7 @@ export default function Notifications() {
       {/* Notification List */}
       <ul className="space-y-4">
         {notifications
-          .sort((a, b) => dayjs(b.expiresOn).unix() - dayjs(a.expiresOn).unix())
+          .sort((a, b) => dayjs(b.expirationDate).unix() - dayjs(a.expirationDate).unix())
           .map((notif) => (
             <li
               key={notif.id}
@@ -58,7 +58,7 @@ export default function Notifications() {
                   {notif.message}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {dayjs(notif.expiresOn).fromNow()}
+                  {dayjs(notif.expirationDate).fromNow()}
                 </p>
               </div>
             </li>
@@ -94,7 +94,7 @@ export default function Notifications() {
                 </p>
                 <p>
                   <span className="text-white">Expires On:</span>{' '}
-                  {dayjs(selectedSubscriber.expiresOn).format('MMM D, YYYY')}
+                  {dayjs(selectedSubscriber.expirationDate).format('MMM D, YYYY')}
                 </p>
                 <p>
                   <span className="text-white">Worker Type:</span>{' '}

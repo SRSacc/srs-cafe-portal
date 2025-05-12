@@ -92,17 +92,6 @@ export const validateSubscriptionTiming = (subscriptionType, currentTime = dayjs
 export const getSubscriptionStatus = (startDateTime, endDateTime, expirationDate) => {
     const now = dayjs();
 
-    // Debug incoming data
-    console.log('Incoming dates:', {
-        startDateTime,
-        endDateTime,
-        expirationDate,
-        type: {
-            start: typeof startDateTime,
-            end: typeof endDateTime,
-            expiry: typeof expirationDate
-        }
-    });
 
     try {
         // More lenient date validation
@@ -119,12 +108,6 @@ export const getSubscriptionStatus = (startDateTime, endDateTime, expirationDate
 
         // Check if dates are valid
         if (!start?.isValid() || !end?.isValid() || !expiry?.isValid()) {
-
-            console.log('Invalid dates after parsing:', {
-                start: start.format(),
-                end: end.format(),
-                expiry: expiry.format()
-            });
             return {
                 status: 'invalid',
                 message: 'Invalid subscription dates'

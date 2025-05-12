@@ -15,7 +15,10 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<AuthPage />} />
+          <Route
+           path="/"
+           element={<AuthPage />}
+          />
 
           {/* Admin1 Routes */}
           <Route path="/admin1" element={<Admin1Layout />}>

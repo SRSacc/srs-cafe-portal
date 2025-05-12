@@ -10,7 +10,7 @@ export function NotificationProvider({ children }) {
       name: 'Jane Doe',
       message: 'Subscription expires in 12 hours',
       status: 'expiring',
-      expiresOn: '2025-03-29',
+      expirationDate: '2025-03-29',
       isNew: true,
       image: '/avatar1.png',
       type: 'srs',

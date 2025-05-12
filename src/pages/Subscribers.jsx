@@ -142,7 +142,6 @@ export default function Subscribers() {
       paymentMode: sub.subscriberDetails?.paymentMode || 'Not Specified',
       image: sub.subscriberDetails?.image,
       subscriberType: sub.subscriberDetails?.subscriberType,
-      expiresOn: sub.subscriberDetails?.expiresOn,
       startDateTime: sub.subscriberDetails?.startDateTime,
       endDateTime: sub.subscriberDetails?.endDateTime,
       expirationDate: sub.subscriberDetails?.expirationDate
@@ -194,8 +193,6 @@ export default function Subscribers() {
       try {
         setLoading(true);
         const response = await getSubscribers(currentPage, itemsPerPage);
-        // console.log('API response:', response); // Log the received data
-
         const subscribersData = response.subscribers || [];
         const paginationData = response.pagination || {};
 
@@ -428,8 +425,8 @@ export default function Subscribers() {
               <div className="text-xs text-gray-400 flex items-center justify-center gap-2 bg-black/20 rounded-full px-3 py-1.5">
                 <Clock size={14} className="text-gray-300" />
                 <p className="text-gray-300">
-                  {sub.subscriberDetails?.expiresOn
-                    ? `Expires: ${dayjs(sub.subscriberDetails.expiresOn).format('MMM DD, YYYY [at] hh:mm A')}`
+                  {sub.subscriberDetails?.expirationDate
+                    ? `Expires: ${dayjs(sub.subscriberDetails.expirationDate).format('MMM DD, YYYY [at] hh:mm A')}`
                     : 'Expiration date not set'}
                 </p>
               </div>
@@ -466,7 +463,7 @@ export default function Subscribers() {
                       </div>
                       <div>
                         <p className="text-xs text-gray-400">Expiration Date</p>
-                        <p className="text-sm">{sub.expiresOn}</p>
+                        <p className="text-sm">{sub.expirationDate}</p>
                       </div>
                     </div>
                   </div>
@@ -764,7 +761,7 @@ export default function Subscribers() {
                 )}
                 <div>
                   <p className="text-gray-400 text-sm">Expires On</p>
-                  <p className="text-white">{detailModal.expiresOn || 'N/A'}</p>
+                  <p className="text-white">{dayjs(detailModal.expirationDate).format('MMM DD, YYYY [at] hh:mm A')  || 'N/A'}</p>
                 </div>
               </div>
 
