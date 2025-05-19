@@ -10,7 +10,7 @@ import Notifications from './pages/Notifications';
 import WorkHours from './pages/WorkHours';
 import Subscription from './pages/Subscription';
 import LandingPage from './pages/LandingPage';
-import Contact from './pages/Contact'; // <-- Make sure this import exists
+import Contact from './pages/Contact';
 
 function App() {
   return (
@@ -20,9 +20,7 @@ function App() {
           <Route
            path="/"
            element={<LandingPage />}
-          >
-            <Route path="/AuthPage" element={<AuthPage />} />
-          </Route>
+          />
 
           <Route
             path="/AuthPage"
