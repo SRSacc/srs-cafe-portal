@@ -6,6 +6,7 @@ import { Edit, Trash2, X } from 'lucide-react';
 import { getSubscribers, updateSubscriber, deleteSubscriber } from '../api/subscriber';
 import avatar from '../assets/avatar.png';
 import { compressImage } from '../utils/imageCompression';
+import { calculateEndTime, calculateExpirationDate } from '../utils/subscriptionUtils';
 
 
 const statusColors = {
@@ -83,6 +84,9 @@ export default function Subscribers() {
   };
 
 
+  // Track original subscription type for comparison
+  const [originalSubscriptionType, setOriginalSubscriptionType] = useState(null);
+
   // Update handleSaveEdit function
   const handleSaveEdit = async () => {
     try {
@@ -101,6 +105,15 @@ export default function Subscribers() {
           paymentMode: editModal.paymentMode,
           status: editModal.status
         };
+        
+        // If subscription type has changed, reset dates
+        if (editModal.subscriptionType !== originalSubscriptionType && editModal.resetDates) {
+          const currentDateTime = dayjs();
+          updateData.startDateTime = currentDateTime.format('YYYY-MM-DD HH:mm:ss');
+          updateData.endDateTime = calculateEndTime(currentDateTime, editModal.subscriptionType);
+          updateData.expirationDate = calculateExpirationDate(currentDateTime, editModal.subscriptionType).format('YYYY-MM-DD HH:mm:ss');
+        }
+        
         await updateSubscriber(editModal.id, updateData);
       }
 
@@ -490,15 +503,20 @@ export default function Subscribers() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  
+                  const subscriptionType = sub.subscriberDetails?.subscriptionType;
+                  setOriginalSubscriptionType(subscriptionType);
                   setEditModal({
                   id: sub._id,
                   name: sub.subscriberDetails?.fullName || sub.subscriberDetails?.name,
                   status: sub.subscriberDetails?.status,
-                  subscriptionType: sub.subscriberDetails?.subscriptionType,
+                  subscriptionType: subscriptionType,
                   paymentMode: sub.subscriberDetails?.paymentMode,
                   image: sub.subscriberDetails?.image,
-                  subscriberType: sub.subscriberDetails?.subscriberType  // Add this line
+                  startDateTime: sub.subscriberDetails?.startDateTime,
+                  endDateTime: sub.subscriberDetails?.endDateTime,
+                  expirationDate: sub.subscriberDetails?.expirationDate,
+                  resetDates: false,
+                  subscriberType: sub.subscriberDetails?.subscriberType
                 });
               }}
                 className="bg-black/40 hover:bg-black/60 text-white p-2 rounded-lg transition-all duration-300"
@@ -612,7 +630,16 @@ export default function Subscribers() {
                 <label className="block mb-1 text-sm font-medium">Subscription Type</label>
                 <select
                   value={editModal.subscriptionType || ''}
-                  onChange={(e) => setEditModal({ ...editModal, subscriptionType: e.target.value })}
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    const typeChanged = newType !== originalSubscriptionType;
+                    setEditModal({ 
+                      ...editModal, 
+                      subscriptionType: newType,
+                      // Auto-check reset dates if subscription type changes
+                      resetDates: typeChanged ? true : editModal.resetDates
+                    });
+                  }}
                   className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none"
                 >
                   <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Half-day (morning)">Half-day (Morning)</option>
@@ -625,6 +652,23 @@ export default function Subscribers() {
                   <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Monthly (day-only)">Monthly (Day Only)</option>
                   <option className="text-white rounded-lg bg-gray-700 border border-gray-600" value="Monthly (full-access)">Monthly (Full Access)</option>
                 </select>
+                {editModal.subscriptionType !== originalSubscriptionType && (
+                  <p className="text-xs text-yellow-400 mt-1">Subscription type changed. Dates will be reset.</p>
+                )}
+              </div>
+              
+              {/* Reset Dates Checkbox */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="resetDates"
+                  checked={editModal.resetDates}
+                  onChange={(e) => setEditModal({ ...editModal, resetDates: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="resetDates" className="ml-2 text-sm font-medium text-white">
+                  Reset subscription dates to current time
+                </label>
               </div>
 
               {/* Payment Mode */}
@@ -796,3 +840,4 @@ export default function Subscribers() {
     </div>
   );
 }
+
