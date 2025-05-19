@@ -45,7 +45,7 @@ export default function Admin1Layout() {
   };
 
   return (
-    <div className="flex h-screen text-white font-sans relative">
+    <div className="flex h-screen text-white font-sans relative bg-black">
       {/* Mobile & Tablet Menu Toggle */}
       {!sidebarOpen && (
         <div className="lg:hidden absolute top-4 left-4 z-50">
@@ -64,7 +64,7 @@ export default function Admin1Layout() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:static top-0 left-0 z-40 h-full w-64 bg-black p-6 flex flex-col justify-between border-r border-white/10 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <aside className={`fixed lg:static top-0 left-0 z-40 h-full w-64 bg-black/90 p-6 flex flex-col justify-between border-r border-white/10 backdrop-blur-sm shadow-xl transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div>
           <div className="flex items-center gap-3 mb-10">
             <img src={Logo} alt="SRS Café Logo" className="w-12 h-12" />
@@ -106,7 +106,7 @@ export default function Admin1Layout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 bg-gradient-to-br from-black via-gray-900 to-gray-950 overflow-y-auto">
+      <div className="flex-1 bg-black/90 backdrop-blur-sm overflow-y-auto">
         {/* Page Header */}
         <header className="sticky top-0 z-30 lg:z-20 backdrop-blur-md bg-white/5 px-8 py-4 border-b border-white/10 lg:pl-8 pl-16">
           <h2 className="text-2xl font-semibold capitalize">
