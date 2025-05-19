@@ -9,6 +9,8 @@ import Subscribers from './pages/Subscribers';
 import Notifications from './pages/Notifications';
 import WorkHours from './pages/WorkHours';
 import Subscription from './pages/Subscription';
+import LandingPage from './pages/LandingPage';
+import Contact from './pages/Contact';
 
 function App() {
   return (
@@ -17,7 +19,18 @@ function App() {
         <Routes>
           <Route
            path="/"
-           element={<AuthPage />}
+           element={<LandingPage />}
+          />
+
+          <Route
+            path="/AuthPage"
+            element={<AuthPage />}
+          />
+
+
+          <Route
+            path="/contact"
+            element={<Contact />}
           />
 
           {/* Admin1 Routes */}
