@@ -22,6 +22,7 @@ function App() {
            element={<LandingPage />}
           />
 
+          {/* correct it route issues */}
           <Route
             path="/AuthPage"
             element={<AuthPage />}
