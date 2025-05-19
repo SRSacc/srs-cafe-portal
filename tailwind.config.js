@@ -9,6 +9,7 @@ export default {
       animation: {
         'fade-in-up': 'fadeInUp 0.5s ease-out',
         'slide-in': 'slide-in 0.3s ease-out',
+        'border-spin': 'border-spin 7s linear infinite',
       },
       keyframes: {
         fadeInUp: {
@@ -18,7 +19,11 @@ export default {
         'slide-in': {
           '0%': { transform: 'translateX(100%)' },
           '100%': { transform: 'translateX(0)' },
-        }
+        },
+        'border-spin': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(-360deg)' },
+        },
       },
     },
   }, 
