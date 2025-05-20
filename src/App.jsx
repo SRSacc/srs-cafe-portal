@@ -11,6 +11,9 @@ import WorkHours from './pages/WorkHours';
 import Subscription from './pages/Subscription';
 import LandingPage from './pages/LandingPage';
 import Contact from './pages/Contact';
+import About from './pages/About';
+import Pricing from './pages/Pricing';
+
 
 function App() {
   return (
@@ -32,6 +35,17 @@ function App() {
           <Route
             path="/contact"
             element={<Contact />}
+          />
+
+          
+          <Route
+            path="/about"
+            element={<About />}
+          />
+
+          <Route
+            path="/pricing"
+            element={<Pricing />}
           />
 
           {/* Admin1 Routes */}

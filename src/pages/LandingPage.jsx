@@ -192,7 +192,7 @@ export default function LandingPage() {
           Ready to join the future of work?
         </h2>
         <button
-          onClick={() => navigate('/login')}
+          onClick={() => navigate('/Pricing')}
           className="bg-gradient-to-r from-gray-700 to-black hover:from-gray-800 hover:to-gray-900 text-white px-8 sm:px-12 py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-xl sm:text-2xl shadow-xl transition mt-2 transform hover:scale-105 w-full sm:w-auto"
         >
           Get Your Pass
