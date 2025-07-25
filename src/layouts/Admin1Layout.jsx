@@ -6,10 +6,13 @@ import { useNotifications } from '../context/NotificationContext';
 import { fetchUserData } from '../api/auth';
 
 // , icon: <Users size={18} />
+// , icon: <UserPlus size={18} /> 
+// , icon: <Bell size={18} /> 
+
 const navItems = [
   { name: 'Dashboard', path: '/admin1/dashboard'},
-  { name: 'Register', path: '/admin1/register', icon: <UserPlus size={18} /> },
-  { name: 'Notifications', path: '/admin1/notifications', icon: <Bell size={18} /> },
+  { name: 'Register', path: '/admin1/register'},
+  { name: 'Notifications', path: '/admin1/notifications'},
 ];
 
 export default function Admin1Layout() {
