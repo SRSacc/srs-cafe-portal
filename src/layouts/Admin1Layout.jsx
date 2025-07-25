@@ -5,8 +5,9 @@ import Logo from '../assets/SRSLogoWhite.svg';
 import { useNotifications } from '../context/NotificationContext';
 import { fetchUserData } from '../api/auth';
 
+// , icon: <Users size={18} />
 const navItems = [
-  { name: 'Dashboard', path: '/admin1/dashboard', icon: <Users size={18} /> },
+  { name: 'Dashboard', path: '/admin1/dashboard'},
   { name: 'Register', path: '/admin1/register', icon: <UserPlus size={18} /> },
   { name: 'Notifications', path: '/admin1/notifications', icon: <Bell size={18} /> },
 ];
