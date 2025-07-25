@@ -12,11 +12,15 @@ import {
   Menu
 } from "lucide-react";
 
+// , icon: <Settings size={20} /> 
+// , icon: <Database size={20} />
+// , icon: <Users size={20} /> 
+// , icon: <Bell size={20} /> 
 const navItems = [
-  { name: 'System Config', path: '/admin2/system', icon: <Settings size={20} /> },
-  { name: 'Database', path: '/admin2/database', icon: <Database size={20} /> },
-  { name: 'User Management', path: '/admin2/users', icon: <Users size={20} /> },
-  { name: 'Notifications', path: '/admin2/notifications', icon: <Bell size={20} /> },
+  { name: 'System Config', path: '/admin2/system'},
+  { name: 'Database', path: '/admin2/database'},
+  { name: 'User Management', path: '/admin2/users'},
+  { name: 'Notifications', path: '/admin2/notifications'},
 ];
 
 export default function Admin2Layout() {
