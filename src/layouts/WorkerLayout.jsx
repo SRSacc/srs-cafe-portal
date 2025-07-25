@@ -5,10 +5,13 @@ import { Clock, CreditCard, Bell } from "lucide-react";
 import Sidebar from '../components/common/Sidebar';
 import Header from '../components/common/Header';
 
+// , icon: <Clock size={20} /> 
+// , icon: <CreditCard size={20} /> 
+// , icon: <Bell size={20} /> 
 const navItems = [
-  { name: 'Work Hours', path: '/worker/hours', icon: <Clock size={20} /> },
-  { name: 'Subscription', path: '/worker/subscription', icon: <CreditCard size={20} /> },
-  { name: 'Notifications', path: '/worker/notifications', icon: <Bell size={20} /> },
+  { name: 'Work Hours', path: '/worker/hours'},
+  { name: 'Subscription', path: '/worker/subscription'},
+  { name: 'Notifications', path: '/worker/notifications'},
 ];
 
 export default function WorkerLayout() {
