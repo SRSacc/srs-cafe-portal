@@ -8,11 +8,13 @@ The application now includes mock data functionality that allows you to view and
 
 ### Automatic Mock Mode
 
-When you navigate to `/admin1/dashboard` without a valid authentication token, the application automatically:
+When running in **development mode** (via `npm run dev`) and navigating to `/admin1/dashboard` without a valid authentication token, the application automatically:
 
-1. Sets a `mock-token` in localStorage
+1. Sets a `mock-token` in localStorage (development only)
 2. Returns mock user data (`demo-admin` with role `Admin1`)
 3. Returns mock subscriber data (12 sample subscribers with various statuses)
+
+**Security Note**: Mock mode only activates in development mode. In production builds, the app will always require real authentication.
 
 ### Mock Data Includes
 
@@ -64,13 +66,15 @@ To return to mock mode:
 
 ## Files Modified
 
-- `src/api/auth.js` - Added mock data support for authentication
-- `src/api/subscriber.js` - Added mock data support for subscriber operations
-- `src/layouts/Admin1Layout.jsx` - Auto-sets mock token if none exists
+- `src/api/auth.js` - Uses shared utility for mock data support
+- `src/api/subscriber.js` - Uses shared utility for mock data support
+- `src/layouts/Admin1Layout.jsx` - Uses shared utility to set mock token in dev mode
 - `src/mocks/subscriberData.js` - Contains all mock data
+- `src/utils/mockMode.js` - **NEW** Shared utility for mock mode detection with security checks
 
 ## Notes
 
+- Mock mode **only works in development** (`npm run dev`). Production builds will never use mock data.
 - Mock data operations (edit, delete) will appear to succeed but won't actually modify the data
 - Refreshing the page will reset all changes
 - This is intended for development and UI testing only

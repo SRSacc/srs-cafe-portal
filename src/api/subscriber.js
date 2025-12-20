@@ -1,12 +1,7 @@
 import { mockSubscribers } from '../mocks/subscriberData';
+import { shouldUseMockData } from '../utils/mockMode';
 
 const API_URL = 'https://srsapp-api.onrender.com/api';
-
-// Helper function to check if we should use mock data
-const shouldUseMockData = () => {
-  const token = localStorage.getItem('token');
-  return !token || token === 'mock-token';
-};
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {

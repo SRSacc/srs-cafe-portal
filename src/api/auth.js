@@ -1,10 +1,5 @@
 import { mockUserData } from '../mocks/subscriberData';
-
-// Helper function to check if we should use mock data
-const shouldUseMockData = () => {
-  const token = localStorage.getItem('token');
-  return !token || token === 'mock-token';
-};
+import { shouldUseMockData } from '../utils/mockMode';
 
   // Function to fetch (POST) user data
 export async function loginUser({ username, password, role }) {
@@ -27,7 +22,7 @@ export async function loginUser({ username, password, role }) {
 
   // Function to fetch (GET) user data
 export async function fetchUserData(token) {
-  // Use mock data if no token or in development mode
+  // Use mock data in development mode if no token or mock token
   if (shouldUseMockData() || token === 'mock-token') {
     return new Promise((resolve) => {
       setTimeout(() => {

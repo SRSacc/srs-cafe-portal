@@ -4,6 +4,7 @@ import { Home, UserPlus, Users, Bell, Menu, LogOut } from 'lucide-react';
 import Logo from '../assets/SRSLogoWhite.svg';
 import { useNotifications } from '../context/NotificationContext';
 import { fetchUserData } from '../api/auth';
+import { setMockToken } from '../utils/mockMode';
 
 // , icon: <Users size={18} />
 // , icon: <UserPlus size={18} /> 
@@ -24,13 +25,8 @@ export default function Admin1Layout() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let token = localStorage.getItem('token');
-    
-    // If no token exists, set a mock token for development
-    if (!token) {
-      token = 'mock-token';
-      localStorage.setItem('token', token);
-    }
+    // Set mock token if in development mode and no token exists
+    const token = setMockToken() || localStorage.getItem('token');
     
     if (token) {
       setIsLoading(true);
