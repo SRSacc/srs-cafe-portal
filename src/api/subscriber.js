@@ -1,3 +1,6 @@
+import { mockSubscribers } from '../mocks/subscriberData';
+import { shouldUseMockData } from '../utils/mockMode';
+
 const API_URL = 'https://srsapp-api.onrender.com/api';
 
 // Helper function to handle API responses
@@ -11,6 +14,28 @@ const handleResponse = async (response) => {
 
 // Get all subscribers
 export async function getSubscribers(page = 1, limit = 12) {
+  // Use mock data if no token is present
+  if (shouldUseMockData()) {
+    // Simulate pagination with mock data
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginatedData = mockSubscribers.slice(start, end);
+    
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          subscribers: paginatedData,
+          pagination: {
+            total: mockSubscribers.length,
+            page: page,
+            limit: limit,
+            pages: Math.ceil(mockSubscribers.length / limit)
+          }
+        });
+      }, 300); // Simulate network delay
+    });
+  }
+
   const response = await fetch(`${API_URL}/users/subscribers?page=${page}&limit=${limit}`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -33,6 +58,15 @@ export async function registerSubscriber(formData) {
 
 // Update subscriber
 export async function updateSubscriber(id, data) {
+  // In mock mode, just simulate success
+  if (shouldUseMockData()) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ success: true, message: 'Subscriber updated successfully (mock)' });
+      }, 300);
+    });
+  }
+
   const isImageUpdate = id.includes('/image');
   
   const response = await fetch(`${API_URL}/users/subscribers/${id}`, {
@@ -48,6 +82,15 @@ export async function updateSubscriber(id, data) {
 
 // Delete subscriber
 export async function deleteSubscriber(id) {
+  // In mock mode, just simulate success
+  if (shouldUseMockData()) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ success: true, message: 'Subscriber deleted successfully (mock)' });
+      }, 300);
+    });
+  }
+
   const response = await fetch(`${API_URL}/users/subscribers/${id}`, {
     method: 'DELETE',
     headers: {
