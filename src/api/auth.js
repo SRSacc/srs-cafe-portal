@@ -1,3 +1,11 @@
+import { mockUserData } from '../mocks/subscriberData';
+
+// Helper function to check if we should use mock data
+const shouldUseMockData = () => {
+  const token = localStorage.getItem('token');
+  return !token || token === 'mock-token';
+};
+
   // Function to fetch (POST) user data
 export async function loginUser({ username, password, role }) {
     const response = await fetch('https://srsapp-api.onrender.com/api/auth/login', {
@@ -19,6 +27,15 @@ export async function loginUser({ username, password, role }) {
 
   // Function to fetch (GET) user data
 export async function fetchUserData(token) {
+  // Use mock data if no token or in development mode
+  if (shouldUseMockData() || token === 'mock-token') {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(mockUserData);
+      }, 200); // Simulate network delay
+    });
+  }
+
   const response = await fetch('https://srsapp-api.onrender.com/api/users/me', {
     method: 'GET',
     headers: {

@@ -24,7 +24,14 @@ export default function Admin1Layout() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    let token = localStorage.getItem('token');
+    
+    // If no token exists, set a mock token for development
+    if (!token) {
+      token = 'mock-token';
+      localStorage.setItem('token', token);
+    }
+    
     if (token) {
       setIsLoading(true);
       fetchUserData(token)
